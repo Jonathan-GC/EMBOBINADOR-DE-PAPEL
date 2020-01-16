@@ -9,9 +9,9 @@
 
 #include <phi_interfaces.h>
 
-#define Encoder1ChnA 12
-#define Encoder1ChnB 13
-#define EncoderDetent A0
+#define Encoder1ChnA A0
+#define Encoder1ChnB A1
+#define EncoderDetent A2
 
 char mapping1[]={'U','D'}; // This is a rotary encoder so it returns U for up and D for down on the dial.
 phi_rotary_encoders my_encoder1(mapping1, Encoder1ChnA, Encoder1ChnB, EncoderDetent);
