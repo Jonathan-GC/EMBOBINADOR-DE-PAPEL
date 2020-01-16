@@ -50,7 +50,7 @@ void setup() {
      * stepper.rotate(360);
      */
      //stepper.startRotate(360);
-     stepper.rotate(720);
+     stepper.rotate(360);
 }
 
 void loop() {
@@ -63,8 +63,14 @@ void loop() {
         Serial.print("  rpm="); Serial.print(stepper.getCurrentRPM());
         Serial.println();
     } else {
-        stepper.disable();
+        //stepper.stop();
         Serial.println("END");
         delay(2000);
+        stepper.disable();
+        pinMode(8,1);
+        digitalWrite(8,1);
+        
     }
+
+    
 }
