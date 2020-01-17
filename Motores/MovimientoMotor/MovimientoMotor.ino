@@ -27,6 +27,7 @@
 // All the wires needed for full functionality
 #define DIR 3
 #define STEP 6
+
 //Uncomment line to use enable/disable functionality
 //#define SLEEP 13
 
@@ -50,7 +51,7 @@ void loop() {
     /*
      * Moving motor one full revolution using the degree notation
      */
-    stepper.rotate(90);
+    stepper.rotate(-360);
 
     /*
      * Moving motor to original position using steps
