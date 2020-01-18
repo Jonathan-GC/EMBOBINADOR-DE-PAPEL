@@ -13,7 +13,7 @@
 
 // Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
 #define MOTOR_STEPS 200
-#define RPM 70
+#define RPM 100
 
 
 
@@ -25,8 +25,8 @@
 #define MICROSTEPS 1
 
 // All the wires needed for full functionality
-#define DIR 3
-#define STEP 6
+#define DIR 4
+#define STEP 7
 
 //Uncomment line to use enable/disable functionality
 //#define SLEEP 13
@@ -41,26 +41,32 @@ void setup() {
     stepper.begin(RPM, MICROSTEPS);
     // if using enable/disable on ENABLE pin (active LOW) instead of SLEEP uncomment next line
     // stepper.setEnableActiveState(LOW);
+    pinMode(8,OUTPUT);
+    
 }
 
 void loop() {
   
     // energize coils - the motor will hold position
     // stepper.enable();
+    digitalWrite(8,0);
   
     /*
      * Moving motor one full revolution using the degree notation
      */
-    stepper.rotate(-360);
+    stepper.rotate(898);
 
     /*
      * Moving motor to original position using steps
-     */
+     */ 
     delay(1000);
-    stepper.move(-MOTOR_STEPS*MICROSTEPS);
+//    stepper.move(-MOTOR_STEPS*MICROSTEPS);
+stepper.rotate(-898);
+
 
     // pause and allow the motor to be moved by hand
     // stepper.disable();
 
     delay(5000);
+    digitalWrite(8,1);
 }
