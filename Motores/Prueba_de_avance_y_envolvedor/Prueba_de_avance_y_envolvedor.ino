@@ -55,7 +55,7 @@ SyncDriver controller(stepperX, stepperY,stepperZ);
 
 void setup() {
 
-    Serial.begin(9600);
+    Serial.begin(115200);
     /*
      * Set target motors RPM.
      */
@@ -75,16 +75,28 @@ void loop() {
         pinMode(8,1); digitalWrite(8,0);
         controller.rotate(287*4, 0,0);
         delay(1000);
-        controller.rotate(287*6,360*7,0);
-       delay(1500);
-       //templar
-        controller.rotate(-90,90,0);
+        controller.rotate(287*6,360*8,0);
+        delay(1500);
+        //templar
+        //controller.rotate(0,360*10,0);
+       // delay(1500);
        //voy a cortar
-        controller.rotate(0,360*5,0);
+       //controller.rotate(0,360*5,0);
         
       }
        if(data == 'b'){
-     controller.rotate(-287*4, 0,0);   
+          pinMode(8,1); digitalWrite(8,0);
+          controller.rotate(-287*4, 0,0);   
+       }
+
+       if(data == 'c'){
+          pinMode(8,1); digitalWrite(8,0);
+          controller.rotate(0, 360 * 10,0);   
+       }
+
+       if(data == 'r'){
+          pinMode(8,1); digitalWrite(8,0);
+          controller.rotate(360*100,0,0);   
        }
     }
 
