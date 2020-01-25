@@ -73,13 +73,20 @@ void loop() {
 
       if(data == 'a'){
         pinMode(8,1); digitalWrite(8,0);
-        controller.rotate(287*2, 0,0);
-        delay(2000);
-        controller.rotate(287*8,360*12,0);
+        controller.rotate(287*1, 0,0);
+        delay(1000);
+        controller.rotate(287*9,360*12,0);
         
-        //controller.rotate(-180*1,360*1,0);
+        //controller.rotate(15*1,0,0);
 
-        controller.rotate(0,360*5,0);
+        //stepperY.begin(200, MICROSTEPS);
+        
+        controller.rotate(-180,360*4,0);
+        
+        //controller.rotate(0,30*1,0);
+        //controller.rotate(-287*2,0,0);
+        
+        //controller.rotate(0,360*5,0);
         delay(1500);
         //templar
         //controller.rotate(200*1,360*1,0);
