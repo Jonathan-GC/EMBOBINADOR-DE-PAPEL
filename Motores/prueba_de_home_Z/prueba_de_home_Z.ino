@@ -40,7 +40,7 @@ void setup() {
     // let's say 100 complete revolutions (arbitrary number)
     //stepper.startMove(100 * MOTOR_STEPS * MICROSTEPS);     // in microsteps
     //es indispensable la funcion startRotate para que el motor pueda parar
-    stepper.startRotate(100 * 360);                     // or in degrees 
+    stepper.startRotate(100 * -360);                     // or in degrees 
 }
 
 void loop() {

@@ -17,7 +17,7 @@
 // Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
 #define MOTOR_STEPS 200
 // Target RPM for X axis motor
-#define MOTOR_X_RPM 100
+#define MOTOR_X_RPM 120
 // Target RPM for Y axis motor
 #define MOTOR_Y_RPM 100
 // Target RPM for Z axis motor
@@ -67,27 +67,38 @@ void setup() {
     // stepperY.setEnableActiveState(LOW);
 }
 
+char data;
 void loop() {
     if(Serial.available()>0){
-      char data = Serial.read();
+        
+        data = Serial.read();
 
-      if(data == 'a'){
+      
+    }
+
+    if(data == 'a'){
         pinMode(8,1); digitalWrite(8,0);
         controller.rotate(287*2, 0,0);
-        delay(2000);
-        controller.rotate(287*8,360*12,0);
-        
+        delay(5000);
+       
+        controller.rotate(287*4,360*6,0);
+        controller.rotate(100,90,0);
+        controller.rotate(-100,0,0);
+        //controller.rotate(0,360*2,0);
+       // controller.rotate(0,0,10);
+       // controller.rotate(0,0,0);
         //controller.rotate(-180*1,360*1,0);
 
-        controller.rotate(0,360*5,0);
-        delay(1500);
+        //controller.rotate(0,360*5,0);
+       // delay(1500);
         //templar
         //controller.rotate(200*1,360*1,0);
-        delay(1500);
+       // delay(1500);
        //voy a cortar
        //controller.rotate(0,360*5,0);
-        
+       data = 0;
       }
+      
        if(data == 'b'){
           pinMode(8,1); digitalWrite(8,0);
           controller.rotate(-287*4, 0,0);   
@@ -100,12 +111,14 @@ void loop() {
 
        if(data == 'r'){
           pinMode(8,1); digitalWrite(8,0);
-          controller.rotate(360*700,0,0);   
+          controller.rotate(360*20,0,0);   
        }
 
         if(data == 'q'){
           pinMode(8,1); digitalWrite(8,0);
-          controller.rotate(287 * 2,0,0);   
+          controller.rotate(287 * 2,0,0);
+          delay(2000);
+          controller.rotate(-287 * 2,0,0);
        }
 
        
@@ -113,8 +126,6 @@ void loop() {
           pinMode(8,1); digitalWrite(8,0);
           controller.rotate(-287 * 2,0,0);   
        }
-    }
-
 
     /*
     delay(1000);
