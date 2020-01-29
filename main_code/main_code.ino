@@ -29,13 +29,14 @@
 // Z motor
 #define DIR_Z 4
 #define STEP_Z 7
-
+#define limiteZ 790
 // If microstepping is set externally, make sure this matches the selected mode
 // 1=full step, 2=half step etc.
 #define MICROSTEPS 1
 
 //pin del Servo Gripper
 #define pinGripper 12
+#define repeticionGripper  2
 short upGripper = 90, downGripper = 115;
 
 
@@ -98,10 +99,8 @@ void loop() {
       Serial.println (dato);
    }
    if (dato=='h'){
-      stepperY.startRotate(100 * -360);
-      stepperZ.startRotate(100 * -360);
-      goToHome ();
-      //habilitarMotores(0);
+      goToHome ();    
+      dato='s';
    }
    if (dato=='s'){
       habilitarMotores(0);
@@ -112,7 +111,7 @@ void loop() {
    }
 
    if (dato=='t'){
-      secuenciaDeCorte(3);
+      secuenciaDeCorte(10);
       dato=0;
    }
 
@@ -123,6 +122,7 @@ void loop() {
    }
 
    if (dato=='y'){
+      
       stepperY.startRotate(10 * 360);
       Serial.println(goToHome_Y());
       
@@ -142,26 +142,20 @@ void goToHome (){
 
 
   //Levantamos el Griper para evitar que se estrelle
-//  Gripper.write(upGripper);
+    Gripper.write(upGripper);
 
-  //Habilitamos los Motores
-  habilitarMotores(true);
+    boolean flag = false;
+    do{
+      stepperY.startRotate(100 * -360);
+      flag = goToHome_Y();
+    }while(!flag);
 
-  
-  if (digitalRead(STOPPER_PIN_Y) == LOW){
-        //Serial.println("STOPPER REACHED");
-        stepperY.startBrake();
-        
-        if (digitalRead(STOPPER_PIN_Z) == HIGH){
-          //Serial.println("STOPPER REACHED");
-          stepperZ.startBrake();
-        }
-   }
-
-   
-   unsigned wait_time_micros = stepperZ.nextAction();
-   unsigned wait_time_micros_1 = stepperY.nextAction();
-   //Serial.println (wait_time_micros);
+    flag = false;
+    
+    do{
+      stepperZ.startRotate(20 * 360);
+      flag = goToHome_Z();
+    }while(!flag);
 
    
     
@@ -198,51 +192,35 @@ void secuenciaDeCorte(int vueltas){
 
   //Desplazar a Z
   stepperZ.rotate(-143);
-  delay(2000);
+  delay(500);
   //bajar a corte
   bajarAcorte();
-  delay(2000);
+  delay(1000);
   //Subir a corte
   subirAcorte();
-  delay(5000);
-  controller.rotate(0,45*34,0);
-  delay(2000);
+  delay(1000);
+  controller.rotate(0,360*3,0);
+  //delay(2000);
+
+  //IR AL INICIO
+  boolean flag = false;
+  do{
+     stepperY.startRotate(10 * 360);
+     flag = goToHome_Y();
+  }while(!flag);
+
 
   //Funcion para extraer papel
-  stepperZ.rotate(44);
-    
-  bajarAcorte();
-  stepperZ.rotate(-780);
-  subirAcorte();
-  delay(2000);
-  stepperZ.rotate(+780);
-  
-  bajarAcorte();
-  stepperZ.rotate(-780);
-  subirAcorte();
-  delay(2000);
-  stepperZ.rotate(+780);
+  extraerPapel();
+
+  flag = false;
+  do{
+     stepperZ.startRotate(10 * 360);
+     flag = goToHome_Z();
+  }while(!flag);
 
 
-  bajarAcorte();
-  stepperZ.rotate(-780);
-  subirAcorte();
-  delay(2000);
-  stepperZ.rotate(+780);
-
-  bajarAcorte();
-  stepperZ.rotate(-780);
-  subirAcorte();
-  delay(2000);
-  stepperZ.rotate(+780);
-
-  
-  dato=0;
-
-  
-
-  
-  
+  dato=0;  
 }
 
 void bajarAcorte(){
@@ -281,6 +259,25 @@ boolean goToHome_Z(){
   }
 
 }
+
+
+void extraerPapel(){
+  
+  //Avance Para Extraer Pwerfectamente
+  stepperZ.rotate(44);
+
+  for(byte i = 0; i < repeticionGripper; i++){
+    bajarAcorte();
+    stepperZ.rotate(-limiteZ);
+    subirAcorte();
+    delay(2000);
+    stepperZ.rotate(limiteZ-20);
+  }
+  
+  
+  
+}
+
 /*
 void esperar(int valor)
 {
