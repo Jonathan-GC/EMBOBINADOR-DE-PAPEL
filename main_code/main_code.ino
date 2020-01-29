@@ -192,15 +192,15 @@ void secuenciaDeCorte(int vueltas){
 
   //Desplazar a Z
   stepperZ.rotate(-143);
-  delay(500);
+  esperar(500);
   //bajar a corte
   bajarAcorte();
-  delay(1000);
+  esperar(1000);
   //Subir a corte
   subirAcorte();
-  delay(1000);
+  esperar(1000);
   controller.rotate(0,360*3,0);
-  //delay(2000);
+  //esperar(2000);
 
   //IR AL INICIO
   boolean flag = false;
@@ -270,7 +270,7 @@ void extraerPapel(){
     bajarAcorte();
     stepperZ.rotate(-limiteZ);
     subirAcorte();
-    delay(2000);
+    esperar(2000);
     stepperZ.rotate(limiteZ-20);
   }
   
@@ -278,11 +278,9 @@ void extraerPapel(){
   
 }
 
-/*
-void esperar(int valor)
-{
- Contador = millis() + valor;
- do {
-         
-      } while (Contador<=millis());
-}*/
+void esperar(int periodo){
+  TiempoAhora = millis();
+  while(millis() < TiempoAhora+periodo){
+    
+  }   
+}
