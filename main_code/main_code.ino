@@ -10,11 +10,11 @@
 // Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
 #define MOTOR_STEPS 200
 // Target RPM for X axis motor
-#define MOTOR_X_RPM 80
+#define MOTOR_X_RPM 100
 // Target RPM for Y axis motor
-#define MOTOR_Y_RPM 80
+#define MOTOR_Y_RPM 100
 // Target RPM for Z axis motor
-#define MOTOR_Z_RPM 80
+#define MOTOR_Z_RPM 100
 
 
 // X motor
@@ -37,7 +37,7 @@
 //pin del Servo Gripper
 #define pinGripper 12
 #define repeticionGripper  2
-short upGripper = 90, downGripper = 115;
+short upGripper = 160, downGripper = 90, ceroGripper = 180;
 
 
 /*************************************
@@ -81,7 +81,7 @@ void setup() {
     //stepperZ.startRotate(10 * 360);
     //***********************************
     
-    
+    Gripper.write(ceroGripper);
     habilitarMotores(false);
   
 
@@ -111,8 +111,13 @@ void loop() {
    }
 
    if (dato=='t'){
-      secuenciaDeCorte(10);
-      dato=0;
+
+      for(int i= 0; i < 5; i++ ){
+          secuenciaDeCorte(10);
+          delay(3000);
+      }
+      dato='s';  
+      
    }
 
    if (dato=='p'){
@@ -133,7 +138,21 @@ void loop() {
       Serial.println(goToHome_Z());
       
    }
-   
+
+   if (dato=='u'){
+      subirAcorte();
+      
+      
+   }
+
+   if (dato=='d'){
+      bajarAcorte();
+      
+   }
+   if (dato=='m'){
+    habilitarMotores(1);
+    moverEjeX();
+   }
    
    
 }
@@ -174,7 +193,7 @@ void habilitarMotores(boolean x){
 
 void alimentarPapel(){
   habilitarMotores(1);
-  controller.rotate(287*1, 0, 0);
+  controller.rotate(310*1, 0, 0);
   dato=0;
   
 }
@@ -191,16 +210,25 @@ void secuenciaDeCorte(int vueltas){
   controller.rotate(0,90,0);
 
   //Desplazar a Z
-  stepperZ.rotate(-143);
-  esperar(500);
+  stepperZ.rotate(-150);
+  esperar(20);
   //bajar a corte
   bajarAcorte();
-  esperar(1000);
+  //delay(2000);
+  esperar(800);
   //Subir a corte
   subirAcorte();
-  esperar(1000);
-  controller.rotate(0,360*3,0);
-  //esperar(2000);
+  //delay(2000);
+  esperar(500);
+  bajarAcorte();
+  //delay(2000);
+  esperar(800);
+  //Subir a corte
+  subirAcorte();
+  //delay(2000);
+  esperar(500);
+  controller.rotate(0,287*3,0);
+  esperar(500);
 
   //IR AL INICIO
   boolean flag = false;
@@ -209,6 +237,7 @@ void secuenciaDeCorte(int vueltas){
      flag = goToHome_Y();
   }while(!flag);
 
+  
 
   //Funcion para extraer papel
   extraerPapel();
@@ -220,15 +249,15 @@ void secuenciaDeCorte(int vueltas){
   }while(!flag);
 
 
-  dato=0;  
+  
 }
 
 void bajarAcorte(){
-  Gripper.write(120);
+  Gripper.write(downGripper);
 }
 
 void subirAcorte(){
-  Gripper.write(70);
+  Gripper.write(upGripper);
 }
 
 boolean goToHome_Y(){
@@ -268,9 +297,11 @@ void extraerPapel(){
 
   for(byte i = 0; i < repeticionGripper; i++){
     bajarAcorte();
+    delay(2000);
     stepperZ.rotate(-limiteZ);
     subirAcorte();
-    esperar(2000);
+    delay(2000);
+    //esperar(2000);
     stepperZ.rotate(limiteZ-20);
   }
   
@@ -283,4 +314,11 @@ void esperar(int periodo){
   while(millis() < TiempoAhora+periodo){
     
   }   
+}
+
+void moverEjeX(){
+  //stepperX.rotate(360);\\
+  habilitarMotores(1);
+  controller.rotate(360*50,0,0);
+  dato='s';
 }
