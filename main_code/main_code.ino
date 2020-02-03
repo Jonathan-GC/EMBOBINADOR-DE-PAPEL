@@ -58,7 +58,7 @@ Servo Gripper;
 
 void setup() {
     Serial.begin(115200);
-
+    Serial.println (joder);
     //Configuracion del Servo
     Gripper.attach(pinGripper);
   
