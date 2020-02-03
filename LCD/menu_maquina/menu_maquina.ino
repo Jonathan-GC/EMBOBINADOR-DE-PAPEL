@@ -28,7 +28,7 @@ short gradosMotor;
 short goToHome = false;
 short goToAlimentar = false;
 short selectorConfiguracion;
-
+short startProduccion= false;
 //----------------------------------------
 
 //****************************************
@@ -78,9 +78,11 @@ const char *txMENU[] = {                                // Los textos del menu p
   "5.Cuadro mm     ",
   "6.Produccion #  ",
   "7.Gripper Out#  ",
-  "8.Mostrar Tiempo", 
-  "9.Guardar       ",
-  "10. Salir       "
+  "8.Mostrar Tiempo",
+  "9.Lineas habiles", 
+  "10.Guardar      ",
+  "11.Salir        ",
+  "12 Iniciar Prod "
 };
 
 const byte iMENU = COUNT(txMENU);                       // Numero de items/opciones del menu principal
@@ -149,6 +151,7 @@ void setup() {
   lcd.begin(columnsLCD, rowsLCD);
   lcd.createChar(iARROW, bARROW);
 
+  /*
   // Imprime la informacion del proyecto:
   lcd.setCursor(0, 0); lcd.print("    Maquina.    ");
   lcd.setCursor(0, 1); lcd.print("  Embobinadora  ");
@@ -161,7 +164,7 @@ void setup() {
   lcd.setCursor(0, 0); lcd.print(" Regi  Basculas ");
   lcd.setCursor(0, 1); lcd.print("   del Tolima   ");
   delay (5000);  lcd.clear();
-
+  */
   
   lcd.setCursor(0, 0); lcd.print("  Configurando  ");
   lcd.setCursor(0, 1);
@@ -194,7 +197,7 @@ void loop() {
   if ( tNow - tPrevious >= 1000 )  {
     tPrevious = tNow;
 
-    if ( memory.d.time_show == 1 || memory.d.temp_show == 1 )
+    if ( memory.d.time_show == 1)
       lcd.clear();
 
     //Establecer el tiempor de maquina
@@ -280,9 +283,11 @@ void openMenu() {
         case 5: openSubMenu( idxMenu, Screen::Number, &memory.d.numeroDeProduccion, 0, 100 ); break;
         case 6: openSubMenu( idxMenu, Screen::Number, &memory.d.vecesDelGripper, 0, 4); break;
         case 7: openSubMenu( idxMenu, Screen::Menu1,  &memory.d.time_unit, 0, COUNT(txSMENU1) - 1 ); break;
-        //case 6: openSubMenu( idxMenu, Screen::Number, &memory.d.temp_x,    0, columnsLCD - 1      ); break;
-        //case 7: openSubMenu( idxMenu, Screen::Number, &memory.d.temp_y,    0, rowsLCD - 1         ); break;
-        case 8: writeConfiguration(); exitMenu = true;                                             break; //Salir y guardar
+        case 8: openSubMenu( idxMenu, Screen::Number, &memory.d.lineasCargadas, 1, 3); break;
+        case 9: writeConfiguration(); exitMenu = true; break; //Salir y guardar
+        case 10: readConfiguration();  exitMenu = true; break; //Salir y cancelar cambios
+        case 11: openSubMenu( idxMenu, Screen::Flag, &startProduccion, 0, 1); break;
+        //Queda pendiente el default                                             break; //Salir y guardar
         
       }
       forcePrint = true;
@@ -415,10 +420,15 @@ void readConfiguration()
     memory.d.time_unit   = 1;
     memory.d.time_x      = 0;
     memory.d.time_y      = 0;
-    memory.d.temp_show   = 1;
-    memory.d.temp_unit   = 0;
-    memory.d.temp_x      = 0;
-    memory.d.temp_y      = 1;
+
+    memory.d.tamanioCuadro= 105;
+    memory.d.velocidad = 100;
+    memory.d.numeroDeCuadros = 10;
+    memory.d.numeroDeProduccion = 5;
+    memory.d.vecesDelGripper = 2;
+    memory.d.metrosEnrrollados = 0;
+    memory.d.lineasCargadas = 3;
+
     writeConfiguration();
   }
 }
