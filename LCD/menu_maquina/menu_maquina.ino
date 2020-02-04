@@ -6,6 +6,66 @@
 #include <LiquidCrystal_I2C.h>
 #include <EEPROM.h>
 
+#include <Arduino.h>
+#include "MultiDriver.h"
+#include "SyncDriver.h"
+#include "BasicStepperDriver.h" // generic
+#include <Servo.h>
+
+#define STOPPER_PIN_Y 10
+#define STOPPER_PIN_Z 11
+
+// Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
+#define MOTOR_STEPS 200
+// Target RPM for X axis motor
+#define MOTOR_X_RPM 100
+// Target RPM for Y axis motor
+#define MOTOR_Y_RPM 100
+// Target RPM for Z axis motor
+#define MOTOR_Z_RPM 100
+
+
+// X motor
+#define DIR_X 2
+#define STEP_X 5
+
+// Y motor
+#define DIR_Y 3
+#define STEP_Y 6
+
+
+// Z motor
+#define DIR_Z 4
+#define STEP_Z 7
+#define limiteZ 790
+// If microstepping is set externally, make sure this matches the selected mode
+// 1=full step, 2=half step etc.
+#define MICROSTEPS 1
+
+//pin del Servo Gripper
+#define pinGripper 12
+#define repeticionGripper  2
+short upGripper = 160, downGripper = 90, ceroGripper = 180;
+
+/*************************************
+  DECLARACION DE OBJETOS PRINCIPALES
+*************************************/
+//Declaracion de motores
+BasicStepperDriver stepperX(MOTOR_STEPS, DIR_X, STEP_X);
+BasicStepperDriver stepperY(MOTOR_STEPS, DIR_Y, STEP_Y);
+BasicStepperDriver stepperZ(MOTOR_STEPS, DIR_Z, STEP_Z);
+
+//Declaracion del controlador
+SyncDriver controller(stepperX, stepperY, stepperZ);
+
+// Declaracion del objeto Servo
+Servo Gripper;
+/*************************************
+*************************************/
+
+
+
+
 /**
     OBJETOS DE LAS LIBRERIAS
 */
@@ -25,8 +85,9 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); //Configuracion d
 //Variables de Funcionamiento
 //****************************************
 short gradosMotor;
-short goToHome = false;
+short goToHomeVar = false;
 short goToAlimentar = false;
+short goToDesactivar = false;
 short selectorConfiguracion;
 short startProduccion= false;
 //----------------------------------------
@@ -82,7 +143,8 @@ const char *txMENU[] = {                                // Los textos del menu p
   "9.Lineas habiles", 
   "10.Guardar      ",
   "11.Salir        ",
-  "12 Iniciar Prod "
+  "12.Iniciar Prod ",
+  "13.Nro Cuadros  " 
 };
 
 const byte iMENU = COUNT(txMENU);                       // Numero de items/opciones del menu principal
@@ -122,6 +184,8 @@ struct MYDATA {         // Estructura STRUCT con las variables que almacenaran l
   short vecesDelGripper;
   long metrosEnrrollados;
   short lineasCargadas;
+  short NroCuadros;
+  
 };
 union MEMORY {     // Estructura UNION para facilitar la lectura y escritura en la EEPROM de la estructura STRUCT
   MYDATA d;
@@ -134,11 +198,10 @@ memory;
    INICIO Y CONFIGURACION DEL PROGRAMA
 */
 void setup() {
-  pinMode(8,1); digitalWrite(8,1);
+ 
 
-  sacarGrados();
   Serial.begin(115200);
-  Serial.println(gradosMotor);
+  
   
   pinMode(pENCO_SW,  INPUT_PULLUP);
   pinMode(pENCO_DT,  INPUT_PULLUP);
@@ -175,7 +238,18 @@ void setup() {
   }
   lcd.clear();
 
+  //Funcion para sacar los grados de la maquina segun papel
+  gradosMotor = int(sacarGrados());
+
+  configurar_maquina();
+  
+
 }
+
+ //char dato=0; linea para borrar
+ unsigned long Contador = 0;
+ unsigned long TiempoAhora=0, periodo=5000;
+
 
 /**
    PROGRAMA PRINCIPAL
@@ -224,23 +298,6 @@ void loop() {
           break;
       }
     }
-    /*para borrar
-    if ( memory.d.temp_show == 1 )
-    {
-      lcd.setCursor(memory.d.temp_x, memory.d.temp_y);
-      switch ( memory.d.temp_unit )
-      {
-        case eSMENU2::GradeC:
-          //lcd.print(getTemp());
-          lcd.print(" C");
-          break;
-        case eSMENU2::GradeF:
-          //lcd.print(1.8 * getTemp() + 32);
-          lcd.print(" F");
-          break;
-      }
-    }
-    */
 
     //Establecer el perfil de los metros enrollados
     lcd.setCursor(0,1);
@@ -248,6 +305,13 @@ void loop() {
     lcd.print(memory.d.metrosEnrrollados);
     lcd.print(" m");
   }
+
+  if(goToAlimentar){
+    funcionPrincipalMaquina('a');
+    goToAlimentar = false;
+  }
+  else if(goToHomeVar)
+    funcionPrincipalMaquina('h');
 
 }
 
@@ -276,8 +340,8 @@ void openMenu() {
       {
         //openSubMenu( byte menuID, Screen screen, int *value, int minValue, int maxValue )
         case 0: readConfiguration();  exitMenu = true; break; //Salir y cancelar cambios
-        case 1: openSubMenu( idxMenu, Screen::Flag,   &goToHome, 0, 1); break;
-        case 2: openSubMenu( idxMenu, Screen::Number, &goToAlimentar,    0, 4); break; 
+        case 1: openSubMenu( idxMenu, Screen::Flag,   &goToHomeVar, 0, 1); break;
+        case 2: openSubMenu( idxMenu, Screen::Number, &goToAlimentar,    0, 4);exitMenu = true; break; 
         case 3: openSubMenu( idxMenu, Screen::Number, &memory.d.velocidad, 70, 150); break;
         case 4: openSubMenu( idxMenu, Screen::Number, &memory.d.tamanioCuadro, 80, 200); break;
         case 5: openSubMenu( idxMenu, Screen::Number, &memory.d.numeroDeProduccion, 0, 100 ); break;
@@ -287,6 +351,7 @@ void openMenu() {
         case 9: writeConfiguration(); exitMenu = true; break; //Salir y guardar
         case 10: readConfiguration();  exitMenu = true; break; //Salir y cancelar cambios
         case 11: openSubMenu( idxMenu, Screen::Flag, &startProduccion, 0, 1); break;
+        case 12: openSubMenu( idxMenu, Screen::Number, &memory.d.NroCuadros, 0, 20); break;
         //Queda pendiente el default                                             break; //Salir y guardar
         
       }
@@ -428,6 +493,7 @@ void readConfiguration()
     memory.d.vecesDelGripper = 2;
     memory.d.metrosEnrrollados = 0;
     memory.d.lineasCargadas = 3;
+    memory.d.NroCuadros=10;
 
     writeConfiguration();
   }
@@ -474,8 +540,4 @@ Button readButtons() {
 
   oldA = newA;
   return btnPressed;
-}
-
-short sacarGrados(){
-  return int((memory.d.tamanioCuadro*360)/(diametroTambor * pi));
 }
