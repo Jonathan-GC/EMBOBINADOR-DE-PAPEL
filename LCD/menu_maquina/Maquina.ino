@@ -57,6 +57,8 @@ void alimentarPapel(){
 void secuenciaDeCorte(int vueltas){
   Serial.print("entra: ");
   Serial.println(vueltas);
+
+  mostrarPantalla();
   
   habilitarMotores(1);
   controller.rotate(gradosMotor*1,0,0);
@@ -153,12 +155,12 @@ void extraerPapel(){
   //Avance Para Extraer Pwerfectamente
   stepperZ.rotate(44);
 
-  for(byte i = 0; i < repeticionGripper; i++){
+  for(byte i = 0; i < memory.d.vecesDelGripper; i++){
     bajarAcorte();
-    delay(2000);
+    esperar(1000);
     stepperZ.rotate(-limiteZ);
     subirAcorte();
-    delay(2000);
+    esperar(2000);
     //esperar(2000);
     stepperZ.rotate(limiteZ-20);
   }
@@ -228,7 +230,7 @@ void funcionPrincipalMaquina(char dato){
 
       for(int i= 0; i < memory.d.numeroDeProduccion; i++ ){
           secuenciaDeCorte(memory.d.NroCuadros);
-          delay(3000);
+          esperar(3000);
       }
       dato='s';  
       

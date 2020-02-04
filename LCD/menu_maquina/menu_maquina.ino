@@ -44,7 +44,7 @@
 
 //pin del Servo Gripper
 #define pinGripper 12
-#define repeticionGripper  2
+//#define repeticionGripper  2
 short upGripper = 160, downGripper = 90, ceroGripper = 180;
 
 /*************************************
@@ -255,64 +255,21 @@ void setup() {
    PROGRAMA PRINCIPAL
 */
 void loop() {
-  static unsigned long tNow      = 0;
-  static unsigned long tPrevious = 0;
+  mostrarPantalla();
 
-  tNow = millis();
-  btnPressed = readButtons();
-  
-
-  //si presiona el boton despliega el menu
-  if ( btnPressed == Button::Ok )
-    openMenu();
-
-
-  // Pinta la pantalla principal cada 1 segundo:
-  if ( tNow - tPrevious >= 1000 )  {
-    tPrevious = tNow;
-
-    if ( memory.d.time_show == 1)
-      lcd.clear();
-
-    //Establecer el tiempor de maquina
-    if ( memory.d.time_show == 1 )
-    {
-      lcd.print("Tiempo: ");
-      lcd.setCursor(8, 0);
-      switch ( memory.d.time_unit )      {
-        case eSMENU1::Milliseconds:
-          lcd.print(tNow);
-          lcd.print(" Mil");
-          break;
-        case eSMENU1::Seconds:
-          lcd.print(tNow / 1000);
-          lcd.print(" Seg");
-          break;
-        case eSMENU1::Minutes:
-          lcd.print(tNow / 1000 / 60);
-          lcd.print(" Min");
-          break;
-        case eSMENU1::Hours:
-          lcd.print(tNow / 1000 / 60 / 60);
-          lcd.print(" Hor");
-          break;
-      }
-    }
-
-    //Establecer el perfil de los metros enrollados
-    lcd.setCursor(0,1);
-    lcd.print("Metros: ");
-    lcd.print(memory.d.metrosEnrrollados);
-    lcd.print(" m");
-  }
 
   if(goToAlimentar){
     funcionPrincipalMaquina('a');
     goToAlimentar = false;
   }
-  else if(goToHomeVar)
+  else if(goToHomeVar){
     funcionPrincipalMaquina('h');
     goToHomeVar = false;
+  }
+  else if(startProduccion){
+    funcionPrincipalMaquina('t');
+    startProduccion=false;
+  }
 
 }
 
@@ -351,7 +308,7 @@ void openMenu() {
         case 8: openSubMenu( idxMenu, Screen::Number, &memory.d.lineasCargadas, 1, 3); break;
         case 9: writeConfiguration(); exitMenu = true; break; //Salir y guardar
         case 10: readConfiguration();  exitMenu = true; break; //Salir y cancelar cambios
-        case 11: openSubMenu( idxMenu, Screen::Flag, &startProduccion, 0, 1); break;
+        case 11: openSubMenu( idxMenu, Screen::Flag, &startProduccion, 0, 1); exitMenu = true; break;
         case 12: openSubMenu( idxMenu, Screen::Number, &memory.d.NroCuadros, 0, 20); break;
         //Queda pendiente el default                                             break; //Salir y guardar
         
@@ -541,4 +498,59 @@ Button readButtons() {
 
   oldA = newA;
   return btnPressed;
+}
+
+
+void mostrarPantalla(){
+  static unsigned long tNow      = 0;
+  static unsigned long tPrevious = 0;
+
+  tNow = millis();
+  btnPressed = readButtons();
+  
+
+  //si presiona el boton despliega el menu
+  if ( btnPressed == Button::Ok )
+    openMenu();
+
+
+  // Pinta la pantalla principal cada 1 segundo:
+  if ( tNow - tPrevious >= 1000 )  {
+    tPrevious = tNow;
+
+    if ( memory.d.time_show == 1)
+      lcd.clear();
+
+    //Establecer el tiempor de maquina
+    if ( memory.d.time_show == 1 )
+    {
+      lcd.print("Tiempo: ");
+      lcd.setCursor(8, 0);
+      switch ( memory.d.time_unit )      {
+        case eSMENU1::Milliseconds:
+          lcd.print(tNow);
+          lcd.print(" Mil");
+          break;
+        case eSMENU1::Seconds:
+          lcd.print(tNow / 1000);
+          lcd.print(" Seg");
+          break;
+        case eSMENU1::Minutes:
+          lcd.print(tNow / 1000 / 60);
+          lcd.print(" Min");
+          break;
+        case eSMENU1::Hours:
+          lcd.print(tNow / 1000 / 60 / 60);
+          lcd.print(" Hor");
+          break;
+      }
+    }
+
+    //Establecer el perfil de los metros enrollados
+    lcd.setCursor(0,1);
+    lcd.print("Metros: ");
+    lcd.print(memory.d.metrosEnrrollados);
+    lcd.print(" m");
+  }
+
 }
