@@ -40,10 +40,17 @@ void habilitarMotores(boolean x){
   pinMode(8,1);
 
   //Preguntamos por el codigo x si quiere encender o apagar con 1 apaga, con 0 enciende
-  if(x)
+  if(x){
     digitalWrite(8, 0);
-  else
+    Gripper.attach(pinGripper);
+  }
+  else{
     digitalWrite(8, 1);
+    //Levantar el servo y luego desactivarlo
+    Gripper.write(ceroGripper);
+    esperar(600);
+    Gripper.detach();
+  }
 }
 
 void alimentarPapel(){
@@ -230,9 +237,12 @@ void funcionPrincipalMaquina(char dato){
 
       for(int i= 0; i < memory.d.numeroDeProduccion; i++ ){
           secuenciaDeCorte(memory.d.NroCuadros);
+          //Muestra la cantidad dispensada, + 1 para que no de cero de inicio
+          cantidadDispensada(i+1);
           esperar(3000);
       }
-      dato='s';  
+      habilitarMotores(false);
+      
       
    }
 
@@ -271,4 +281,11 @@ void funcionPrincipalMaquina(char dato){
    }
    
    
+}
+
+void cantidadDispensada(int factor){
+  //memory.d.metrosEnrrollados = memory.d.numeroDeCuadros*memory.d.tamanioCuadro*memory.d.lineasCargadas*factor;
+  unsigned long flag;
+  flag = memory.d.lineasCargadas * factor;
+  memory.d.metrosEnrrollados = flag;
 }

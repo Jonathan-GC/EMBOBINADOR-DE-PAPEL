@@ -44,7 +44,7 @@
 
 //pin del Servo Gripper
 #define pinGripper 12
-//#define repeticionGripper  2
+
 short upGripper = 160, downGripper = 80, ceroGripper = 180;
 
 /*************************************
@@ -256,7 +256,6 @@ void setup() {
 */
 void loop() {
   mostrarPantalla();
-
 
   if(goToAlimentar){
     funcionPrincipalMaquina('a');
