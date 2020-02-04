@@ -312,6 +312,7 @@ void loop() {
   }
   else if(goToHomeVar)
     funcionPrincipalMaquina('h');
+    goToHomeVar = false;
 
 }
 
@@ -340,7 +341,7 @@ void openMenu() {
       {
         //openSubMenu( byte menuID, Screen screen, int *value, int minValue, int maxValue )
         case 0: readConfiguration();  exitMenu = true; break; //Salir y cancelar cambios
-        case 1: openSubMenu( idxMenu, Screen::Flag,   &goToHomeVar, 0, 1); break;
+        case 1: openSubMenu( idxMenu, Screen::Flag,   &goToHomeVar, 0, 1); exitMenu = true; break;
         case 2: openSubMenu( idxMenu, Screen::Number, &goToAlimentar,    0, 4);exitMenu = true; break; 
         case 3: openSubMenu( idxMenu, Screen::Number, &memory.d.velocidad, 70, 150); break;
         case 4: openSubMenu( idxMenu, Screen::Number, &memory.d.tamanioCuadro, 80, 200); break;
@@ -455,7 +456,7 @@ void openSubMenu( byte menuID, Screen screen, int *value, int minValue, int maxV
       else if ( screen == Screen::Flag )
       {
         lcd.setCursor(columnsLCD / 2 - 1, 1);
-        lcd.print(*value == 0 ? "SI" : "NO");
+        lcd.print(*value == 1 ? "SI" : "NO");
       }
       else if ( screen == Screen::Number )
       {
