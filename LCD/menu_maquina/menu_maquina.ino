@@ -37,7 +37,7 @@
 // Z motor
 #define DIR_Z 4
 #define STEP_Z 7
-#define limiteZ 790
+#define limiteZ 800
 // If microstepping is set externally, make sure this matches the selected mode
 // 1=full step, 2=half step etc.
 #define MICROSTEPS 1
@@ -45,7 +45,7 @@
 //pin del Servo Gripper
 #define pinGripper 12
 //#define repeticionGripper  2
-short upGripper = 160, downGripper = 90, ceroGripper = 180;
+short upGripper = 160, downGripper = 80, ceroGripper = 180;
 
 /*************************************
   DECLARACION DE OBJETOS PRINCIPALES
