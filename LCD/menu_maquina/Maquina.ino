@@ -63,38 +63,30 @@ void secuenciaDeCorte(int vueltas){
   controller.rotate(gradosMotor*1,0,0);
   
   controller.rotate(gradosMotor*(vueltas-1),int(360*((vueltas-1)*1.5)),0);
-  //IR AL INICIO
-  boolean flag = false;
-  do{
-     stepperY.startRotate(10 * 360);
-     flag = goToHome_Y();
-  }while(!flag);
+
+
 
   //Desplazar a Z
   stepperZ.rotate(-150);
   esperar(20);
-  //bajar a corte
-  bajarAcorte();
-  //delay(2000);
-  esperar(1000);
-  //Subir a corte
-  subirAcorte();
-  //delay(2000);
-  esperar(1000);
-  bajarAcorte();
-  //delay(2000);
-  esperar(800);
-  //Subir a corte
-  subirAcorte();
-  //delay(2000);
-  esperar(400);
+
+  for(byte i=0;i < 3;i++){
+    //bajar a corte
+    bajarAcorte();
+    esperar(400);
+    
+    //Subir a corte
+    subirAcorte();
+    esperar(400);
+  }
+
   controller.rotate(0,gradosMotor*2,0);
   //Retrocede para evitar que se pegue el papel
-  controller.rotate(-90,0,0);
+  controller.rotate(-60,0,0);
   esperar(500);
 
   //IR AL INICIO
-  flag = false;
+  boolean flag = false;
   do{
      stepperY.startRotate(10 * 360);
      flag = goToHome_Y();
@@ -105,7 +97,7 @@ void secuenciaDeCorte(int vueltas){
   //Funcion para extraer papel
   extraerPapel();
 
-  controller.rotate(90,0,0);
+  controller.rotate(60,0,0);
   flag = false;
   do{
      stepperZ.startRotate(10 * 360);
@@ -231,12 +223,20 @@ void funcionPrincipalMaquina(char dato){
    }
 
    if (dato=='t'){
-
+      //Variables para humectar
+      int i_anterior=0, repeticiones = 3;
+      
       for(int i= 0; i < memory.d.numeroDeProduccion; i++ ){
           secuenciaDeCorte(memory.d.NroCuadros);
           //Muestra la cantidad dispensada, + 1 para que no de cero de inicio
           cantidadDispensada(i+1);
+          
+          if((i-i_anterior) >= repeticiones){
+            humectar();
+            i_anterior = i;
+          }
           esperar(3000);
+          
       }
       habilitarMotores(false);
       
@@ -285,6 +285,7 @@ void cantidadDispensada(int factor){
   unsigned long flag;
   flag = memory.d.lineasCargadas * factor;
   memory.d.metrosEnrrollados = flag;
+  writeConfiguration();
 }
 
 void extraerVelocidades(short dato){
@@ -294,4 +295,13 @@ void extraerVelocidades(short dato){
    MOTOR_Y_RPM=dato;
   // Target RPM for Z axis motor
    MOTOR_Z_RPM=dato;
+}
+
+void humectar(){
+  //lo mando al final para que no moje carriles
+  stepperZ.rotate(-limiteZ);
+  Gripper.write(110);
+  esperar(3000);
+  goToHome();
+  
 }

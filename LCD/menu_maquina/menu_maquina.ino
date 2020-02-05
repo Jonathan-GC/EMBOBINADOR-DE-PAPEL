@@ -40,7 +40,7 @@
 //pin del Servo Gripper
 #define pinGripper 12
 
-short upGripper = 160, downGripper = 90, ceroGripper = 180;
+short upGripper = 160, downGripper = 87, ceroGripper = 180;
 
 // Target RPM for X axis motor
 short MOTOR_X_RPM;
@@ -92,6 +92,9 @@ short goToAlimentar = false;
 short goToDesactivar = false;
 short selectorConfiguracion;
 short startProduccion= false;
+short restaurarFabricaVar=false;
+short ModoAutomatico=false;
+
 //----------------------------------------
 
 //****************************************
@@ -137,16 +140,18 @@ const char *txMENU[] = {                                // Los textos del menu p
   "1.Atras <<      ",
   "2.Home          ",
   "3.Alimentar     ",
-  "4.Velocidad     ",
-  "5.Cuadro mm     ",
-  "6.Produccion #  ",
-  "7.Gripper Out#  ",
-  "8.Mostrar Tiempo",
-  "9.Lineas habiles", 
-  "10.Guardar      ",
-  "11.Salir        ",
-  "12.Iniciar Prod ",
-  "13.Nro Cuadros  " 
+  "4.Cuadro mm     ",
+  "5.Nro Cuadros   ",
+  "6.Gripper Out#  ",
+  "7.Mostrar Tiempo",
+  "8.Velocidad     ",
+  "9.Lineas habiles",
+  "10.Produccion # ",
+  "11.Guardar      ",
+  "12.INICIAR PROD ",
+  "13.Reset Fabrica",
+  "14.Modo         "
+  
 };
 
 const byte iMENU = COUNT(txMENU);                       // Numero de items/opciones del menu principal
@@ -159,10 +164,10 @@ const char *txSMENU1[] = {        // Textos del submenu 1, longitud maxima = col
   "     Horas      "
 };
 
-enum eSMENU2 { GradeC, GradeF };  // Enumerador de las opciones disponibles del submenu 2 (tienen que seguir el mismo orden que los textos)
+enum eSMENU2 {Automatico, Manual };  // Enumerador de las opciones disponibles del submenu 2 (tienen que seguir el mismo orden que los textos)
 const char *txSMENU2[] = {        // Textos del submenu 1, longitud maxima = columnsLCD-2, rellenar caracteres sobrantes con espacios
-  "     Grados C     ",
-  "     Grados F     "
+  "   Automatico   ",
+  "     Manual     "
 };
 
 /* ESTRUCTURAS CONFIGURACION */
@@ -184,10 +189,10 @@ struct MYDATA {         // Estructura STRUCT con las variables que almacenaran l
   short numeroDeCuadros;
   short numeroDeProduccion;
   short vecesDelGripper;
-  long metrosEnrrollados;
+  long  metrosEnrrollados;
   short lineasCargadas;
   short NroCuadros;
-  
+  short modoAutomatico;
 };
 union MEMORY {     // Estructura UNION para facilitar la lectura y escritura en la EEPROM de la estructura STRUCT
   MYDATA d;
@@ -301,18 +306,24 @@ void openMenu() {
         case 0: readConfiguration();  exitMenu = true; break; //Salir y cancelar cambios
         case 1: openSubMenu( idxMenu, Screen::Flag,   &goToHomeVar, 0, 1); exitMenu = true; break;
         case 2: openSubMenu( idxMenu, Screen::Number, &goToAlimentar,    0, 4);exitMenu = true; break; 
-        case 3: openSubMenu( idxMenu, Screen::Number, &memory.d.velocidad, 70, 150); break;
-        case 4: openSubMenu( idxMenu, Screen::Number, &memory.d.tamanioCuadro, 80, 200); break;
-        case 5: openSubMenu( idxMenu, Screen::Number, &memory.d.numeroDeProduccion, 0, 100 ); break;
-        case 6: openSubMenu( idxMenu, Screen::Number, &memory.d.vecesDelGripper, 0, 4); break;
-        case 7: openSubMenu( idxMenu, Screen::Menu1,  &memory.d.time_unit, 0, COUNT(txSMENU1) - 1 ); break;
-        case 8: openSubMenu( idxMenu, Screen::Number, &memory.d.lineasCargadas, 1, 3); break;
-        case 9: writeConfiguration(); exitMenu = true; break; //Salir y guardar
-        case 10: readConfiguration();  exitMenu = true; break; //Salir y cancelar cambios
+        case 3: openSubMenu( idxMenu, Screen::Number, &memory.d.tamanioCuadro, 80, 200); break;
+        case 4: openSubMenu( idxMenu, Screen::Number, &memory.d.NroCuadros, 0, 20); break;
+        case 5: openSubMenu( idxMenu, Screen::Number, &memory.d.vecesDelGripper, 0, 4); break;
+        case 6: openSubMenu( idxMenu, Screen::Menu1,  &memory.d.time_unit, 0, COUNT(txSMENU1) - 1 ); break;
+        case 7: openSubMenu( idxMenu, Screen::Number, &memory.d.velocidad, 70, 150); break;
+        case 8: openSubMenu( idxMenu, Screen::Number, &memory.d.lineasCargadas, 0, 3); break;
+        case 9: openSubMenu( idxMenu, Screen::Number, &memory.d.numeroDeProduccion, 0, 100 ); break;
+        case 10: writeConfiguration(); exitMenu = true; break; //Salir y guardar
         case 11: openSubMenu( idxMenu, Screen::Flag, &startProduccion, 0, 1); exitMenu = true; break;
-        case 12: openSubMenu( idxMenu, Screen::Number, &memory.d.NroCuadros, 0, 20); break;
-        //Queda pendiente el default                                             break; //Salir y guardar
-        
+        case 12: lcd.clear();lcd.print("Reset Fabrica?");esperar(3000); 
+                 openSubMenu( idxMenu, Screen::Flag, &restaurarFabricaVar, 0, 1);
+                 restaurarFabrica(restaurarFabricaVar); restaurarFabricaVar=false; 
+                 //realiza  el cambio nuevamente
+                 restaurarFabrica(restaurarFabricaVar); 
+                 exitMenu = true; 
+                 break;
+        case 13: openSubMenu( idxMenu, Screen::Menu2,  &memory.d.modoAutomatico, 0, COUNT(txSMENU2)-1 ); Serial.println(memory.d.modoAutomatico); break;        
+
       }
       forcePrint = true;
     }
@@ -439,9 +450,10 @@ void readConfiguration()
     memory.b[i] = EEPROM.read(i);
 
   if ( memory.d.initialized != 'Y' )  {
+    Serial.println("entro en initialized");
     memory.d.initialized = 'Y';
     memory.d.time_show   = 1;
-    memory.d.time_unit   = 1;
+    memory.d.time_unit   = 2;
     memory.d.time_x      = 0;
     memory.d.time_y      = 0;
 
@@ -453,6 +465,7 @@ void readConfiguration()
     memory.d.metrosEnrrollados = 0;
     memory.d.lineasCargadas = 3;
     memory.d.NroCuadros=10;
+    memory.d.modoAutomatico=false;
 
     writeConfiguration();
   }
@@ -560,4 +573,26 @@ void mostrarPantalla(){
     lcd.print(memory.d.metrosEnrrollados*metraje);
   }
 
+}
+
+void restaurarFabrica(boolean value){
+  if(value){
+    //Restaurar memoria cambia el valor a N
+    memory.d.initialized = 'N';
+    //Lo escribe en la configuracion!
+    writeConfiguration();
+
+    //Vuelve y lo manda a leer para cargar los datos
+    readConfiguration();
+  }else{
+
+    //Lo carga Con Y para que se pueda habilitar nuevamente la maquina 
+    memory.d.initialized = 'Y';
+    //Lo escribe en la configuracion!
+    writeConfiguration();
+    //Vuelve y lo manda a leer para cargar los datos
+    readConfiguration();
+    
+  }
+  
 }
