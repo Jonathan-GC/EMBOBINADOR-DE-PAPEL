@@ -8,7 +8,9 @@ float sacarGrados(){
 void configurar_maquina(){
       //Configuracion del Servo
     Gripper.attach(pinGripper);
-  
+
+    //Estraer las velocidades de la EEProm
+    extraerVelocidades(memory.d.velocidad);
     //Configuracion del motores
     stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
     stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
@@ -18,16 +20,6 @@ void configurar_maquina(){
     pinMode(STOPPER_PIN_Y, INPUT_PULLUP);
     pinMode(STOPPER_PIN_Z, INPUT_PULLUP);
 
-    //*************************************
-    //eSTE BLOQUE DEBE DE SER BORRADO PAR 
-    //evitar problemas en el controlador
-    
-    //stepperY.startRotate(100 * -360);
-    //stepperZ.startRotate(100 * -360);
-    //stepperY.startRotate(10 * 360);
-    //stepperZ.startRotate(10 * 360);
-    //***********************************
-    
     Gripper.write(ceroGripper);
     habilitarMotores(false);
   
@@ -71,7 +63,12 @@ void secuenciaDeCorte(int vueltas){
   controller.rotate(gradosMotor*1,0,0);
   
   controller.rotate(gradosMotor*(vueltas-1),int(360*((vueltas-1)*1.5)),0);
-  controller.rotate(0,90,0);
+  //IR AL INICIO
+  boolean flag = false;
+  do{
+     stepperY.startRotate(10 * 360);
+     flag = goToHome_Y();
+  }while(!flag);
 
   //Desplazar a Z
   stepperZ.rotate(-150);
@@ -79,25 +76,25 @@ void secuenciaDeCorte(int vueltas){
   //bajar a corte
   bajarAcorte();
   //delay(2000);
-  esperar(800);
+  esperar(1000);
   //Subir a corte
   subirAcorte();
   //delay(2000);
-  esperar(500);
+  esperar(1000);
   bajarAcorte();
   //delay(2000);
   esperar(800);
   //Subir a corte
   subirAcorte();
   //delay(2000);
-  esperar(500);
-  controller.rotate(0,gradosMotor*3,0);
+  esperar(400);
+  controller.rotate(0,gradosMotor*2,0);
   //Retrocede para evitar que se pegue el papel
-  controller.rotate(-45,0,0);
+  controller.rotate(-90,0,0);
   esperar(500);
 
   //IR AL INICIO
-  boolean flag = false;
+  flag = false;
   do{
      stepperY.startRotate(10 * 360);
      flag = goToHome_Y();
@@ -108,7 +105,7 @@ void secuenciaDeCorte(int vueltas){
   //Funcion para extraer papel
   extraerPapel();
 
-  controller.rotate(45,0,0);
+  controller.rotate(90,0,0);
   flag = false;
   do{
      stepperZ.startRotate(10 * 360);
@@ -288,4 +285,13 @@ void cantidadDispensada(int factor){
   unsigned long flag;
   flag = memory.d.lineasCargadas * factor;
   memory.d.metrosEnrrollados = flag;
+}
+
+void extraerVelocidades(short dato){
+    // Target RPM for X axis motor
+   MOTOR_X_RPM=dato;
+  // Target RPM for Y axis motor
+   MOTOR_Y_RPM=dato;
+  // Target RPM for Z axis motor
+   MOTOR_Z_RPM=dato;
 }

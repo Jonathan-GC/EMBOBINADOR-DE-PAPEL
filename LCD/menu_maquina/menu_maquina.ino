@@ -17,12 +17,7 @@
 
 // Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
 #define MOTOR_STEPS 200
-// Target RPM for X axis motor
-#define MOTOR_X_RPM 100
-// Target RPM for Y axis motor
-#define MOTOR_Y_RPM 100
-// Target RPM for Z axis motor
-#define MOTOR_Z_RPM 100
+
 
 
 // X motor
@@ -45,7 +40,14 @@
 //pin del Servo Gripper
 #define pinGripper 12
 
-short upGripper = 160, downGripper = 80, ceroGripper = 180;
+short upGripper = 160, downGripper = 90, ceroGripper = 180;
+
+// Target RPM for X axis motor
+short MOTOR_X_RPM;
+// Target RPM for Y axis motor
+short MOTOR_Y_RPM;
+// Target RPM for Z axis motor
+short MOTOR_Z_RPM;
 
 /*************************************
   DECLARACION DE OBJETOS PRINCIPALES
@@ -547,9 +549,15 @@ void mostrarPantalla(){
 
     //Establecer el perfil de los metros enrollados
     lcd.setCursor(0,1);
-    lcd.print("Metros: ");
+    lcd.print("Un: ");
     lcd.print(memory.d.metrosEnrrollados);
-    lcd.print(" m");
+    lcd.print(" m: ");
+    double metraje;
+    metraje=(memory.d.tamanioCuadro*memory.d.NroCuadros);
+    metraje*=memory.d.lineasCargadas;
+    metraje/=1000;
+    //Serial.println(metraje);
+    lcd.print(memory.d.metrosEnrrollados*metraje);
   }
 
 }
