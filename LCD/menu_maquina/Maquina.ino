@@ -9,18 +9,26 @@ void configurar_maquina(){
       //Configuracion del Servo
     Gripper.attach(pinGripper);
 
+    //Configuracion del Bomba
+    pinMode(pinHumectador, OUTPUT);
+
+    
     //Estraer las velocidades de la EEProm
     extraerVelocidades(memory.d.velocidad);
     //Configuracion del motores
     stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
     stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
     stepperZ.begin(MOTOR_Z_RPM, MICROSTEPS);
-
+    
+    
     //Configuracion de pines finales de carrera
     pinMode(STOPPER_PIN_Y, INPUT_PULLUP);
     pinMode(STOPPER_PIN_Z, INPUT_PULLUP);
-
+    pinMode(RUN_PIN, INPUT_PULLUP);
+    
+    
     Gripper.write(ceroGripper);
+    gotear(50);
     habilitarMotores(false);
   
 }
@@ -61,19 +69,36 @@ void secuenciaDeCorte(int vueltas){
   
   habilitarMotores(1);
   controller.rotate(gradosMotor*1,0,0);
+  gotear(40);
+  if(memory.d.modoAutomatico){
+
+    //Esperar a que presione enter
+    lcd.clear();
+    habilitarMotores(false);
+    while(digitalRead(RUN_PIN)){
+      lcd.print("   Continuar?   ");
+      lcd.setCursor(1,0);
+      lcd.print("Presione Enter");
+      
+    }
+    delay(200);
+    mostrarPantalla();
+    habilitarMotores(true);
+  }
+  
   
   controller.rotate(gradosMotor*(vueltas-1),int(360*((vueltas-1)*1.5)),0);
 
 
 
   //Desplazar a Z
-  stepperZ.rotate(-150);
+  stepperZ.rotate(-100);
   esperar(20);
 
-  for(byte i=0;i < 3;i++){
+  for(byte i=0;i < 1;i++){
     //bajar a corte
     bajarAcorte();
-    esperar(400);
+    esperar(1100);
     
     //Subir a corte
     subirAcorte();
@@ -82,8 +107,17 @@ void secuenciaDeCorte(int vueltas){
 
   controller.rotate(0,gradosMotor*2,0);
   //Retrocede para evitar que se pegue el papel
-  controller.rotate(-60,0,0);
+  controller.rotate(-90,0,0);
   esperar(500);
+  for(byte i=0;i < 1;i++){
+    //bajar a corte
+    bajarAcorte();
+    esperar(1100);
+    
+    //Subir a corte
+    subirAcorte();
+    esperar(400);
+  }
 
   //IR AL INICIO
   boolean flag = false;
@@ -97,7 +131,7 @@ void secuenciaDeCorte(int vueltas){
   //Funcion para extraer papel
   extraerPapel();
 
-  controller.rotate(60,0,0);
+  controller.rotate(90,0,0);
   flag = false;
   do{
      stepperZ.startRotate(10 * 360);
@@ -149,7 +183,7 @@ boolean goToHome_Z(){
 void extraerPapel(){
   
   //Avance Para Extraer Pwerfectamente
-  stepperZ.rotate(44);
+  stepperZ.rotate(40);
 
   for(byte i = 0; i < memory.d.vecesDelGripper; i++){
     bajarAcorte();
@@ -157,8 +191,14 @@ void extraerPapel(){
     stepperZ.rotate(-limiteZ);
     subirAcorte();
     esperar(2000);
-    //esperar(2000);
-    stepperZ.rotate(limiteZ-20);
+
+    boolean flag = false;
+    
+    do{
+      stepperZ.startRotate(20 * 360);
+      flag = goToHome_Z();
+    }while(!flag);
+    
   }
   
   
@@ -223,9 +263,13 @@ void funcionPrincipalMaquina(char dato){
    }
 
    if (dato=='t'){
+
+      //Ir a inicio
+      goToHome();
+      humectar();
+      
       //Variables para humectar
       int i_anterior=0, repeticiones = 3;
-      
       for(int i= 0; i < memory.d.numeroDeProduccion; i++ ){
           secuenciaDeCorte(memory.d.NroCuadros);
           //Muestra la cantidad dispensada, + 1 para que no de cero de inicio
@@ -299,9 +343,16 @@ void extraerVelocidades(short dato){
 
 void humectar(){
   //lo mando al final para que no moje carriles
+  gotear(50);
   stepperZ.rotate(-limiteZ);
   Gripper.write(110);
-  esperar(3000);
+  esperar(800);
   goToHome();
   
+}
+
+void gotear(short espera){
+  digitalWrite(pinHumectador,1);
+  esperar(espera);
+  digitalWrite(pinHumectador,0);
 }

@@ -14,6 +14,7 @@
 
 #define STOPPER_PIN_Y 10
 #define STOPPER_PIN_Z 11
+#define RUN_PIN 9
 
 // Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
 #define MOTOR_STEPS 200
@@ -39,8 +40,9 @@
 
 //pin del Servo Gripper
 #define pinGripper 12
+#define pinHumectador A3
 
-short upGripper = 160, downGripper = 87, ceroGripper = 180;
+short upGripper = 160, downGripper = 90, ceroGripper = 180;
 
 // Target RPM for X axis motor
 short MOTOR_X_RPM;
@@ -138,17 +140,17 @@ enum Screen { Menu1, Menu2, Menu3, Flag, Number };             // Enumerador con
 
 const char *txMENU[] = {                                // Los textos del menu principal, la longitud maxima = columnsLCD-1, rellenar caracteres sobrantes con espacios.
   "1.Atras <<      ",
-  "2.Home          ",
-  "3.Alimentar     ",
-  "4.Cuadro mm     ",
-  "5.Nro Cuadros   ",
-  "6.Gripper Out#  ",
-  "7.Mostrar Tiempo",
-  "8.Velocidad     ",
-  "9.Lineas habiles",
-  "10.Produccion # ",
-  "11.Guardar      ",
-  "12.INICIAR PROD ",
+  "2.INICIAR PRODUC",
+  "3.Home          ",
+  "4.Alimentar     ",
+  "5.Cuadro mm     ",
+  "6.Nro Cuadros   ",
+  "7.Gripper Out#  ",
+  "8.Mostrar Tiempo",
+  "9.Velocidad     ",
+  "10.Lineas habiles",
+  "11.Produccion # ",
+  "12.Guardar      ",
   "13.Reset Fabrica",
   "14.Modo         "
   
@@ -221,7 +223,7 @@ void setup() {
   lcd.begin(columnsLCD, rowsLCD);
   lcd.createChar(iARROW, bARROW);
 
-  /*
+  
   // Imprime la informacion del proyecto:
   lcd.setCursor(0, 0); lcd.print("    Maquina.    ");
   lcd.setCursor(0, 1); lcd.print("  Embobinadora  ");
@@ -231,10 +233,10 @@ void setup() {
   lcd.setCursor(0, 1); lcd.print("Tel: 3054791784");
   delay (2000);  lcd.clear();
 
-  lcd.setCursor(0, 0); lcd.print(" Regi  Basculas ");
+  lcd.setCursor(0, 0); lcd.print("  RegiBasculas  ");
   lcd.setCursor(0, 1); lcd.print("   del Tolima   ");
   delay (5000);  lcd.clear();
-  */
+  
   
   lcd.setCursor(0, 0); lcd.print("  Configurando  ");
   lcd.setCursor(0, 1);
@@ -304,17 +306,17 @@ void openMenu() {
       {
         //openSubMenu( byte menuID, Screen screen, int *value, int minValue, int maxValue )
         case 0: readConfiguration();  exitMenu = true; break; //Salir y cancelar cambios
-        case 1: openSubMenu( idxMenu, Screen::Flag,   &goToHomeVar, 0, 1); exitMenu = true; break;
-        case 2: openSubMenu( idxMenu, Screen::Number, &goToAlimentar,    0, 4);exitMenu = true; break; 
-        case 3: openSubMenu( idxMenu, Screen::Number, &memory.d.tamanioCuadro, 80, 200); break;
-        case 4: openSubMenu( idxMenu, Screen::Number, &memory.d.NroCuadros, 0, 20); break;
-        case 5: openSubMenu( idxMenu, Screen::Number, &memory.d.vecesDelGripper, 0, 4); break;
-        case 6: openSubMenu( idxMenu, Screen::Menu1,  &memory.d.time_unit, 0, COUNT(txSMENU1) - 1 ); break;
-        case 7: openSubMenu( idxMenu, Screen::Number, &memory.d.velocidad, 70, 150); break;
-        case 8: openSubMenu( idxMenu, Screen::Number, &memory.d.lineasCargadas, 0, 3); break;
-        case 9: openSubMenu( idxMenu, Screen::Number, &memory.d.numeroDeProduccion, 0, 100 ); break;
-        case 10: writeConfiguration(); exitMenu = true; break; //Salir y guardar
-        case 11: openSubMenu( idxMenu, Screen::Flag, &startProduccion, 0, 1); exitMenu = true; break;
+        case 1: openSubMenu( idxMenu, Screen::Flag, &startProduccion, 0, 1); exitMenu = true; break;
+        case 2: openSubMenu( idxMenu, Screen::Flag,   &goToHomeVar, 0, 1); exitMenu = true; break;
+        case 3: openSubMenu( idxMenu, Screen::Number, &goToAlimentar,    0, 4);exitMenu = true; break; 
+        case 4: openSubMenu( idxMenu, Screen::Number, &memory.d.tamanioCuadro, 80, 200); break;
+        case 5: openSubMenu( idxMenu, Screen::Number, &memory.d.NroCuadros, 0, 20); break;
+        case 6: openSubMenu( idxMenu, Screen::Number, &memory.d.vecesDelGripper, 0, 4); break;
+        case 7: openSubMenu( idxMenu, Screen::Menu1,  &memory.d.time_unit, 0, COUNT(txSMENU1) - 1 ); break;
+        case 8: openSubMenu( idxMenu, Screen::Number, &memory.d.velocidad, 70, 150); break;
+        case 9: openSubMenu( idxMenu, Screen::Number, &memory.d.lineasCargadas, 0, 3); break;
+        case 10: openSubMenu( idxMenu, Screen::Number, &memory.d.numeroDeProduccion, 0, 100 ); break;
+        case 11: writeConfiguration(); exitMenu = true; break; //Salir y guardar
         case 12: lcd.clear();lcd.print("Reset Fabrica?");esperar(3000); 
                  openSubMenu( idxMenu, Screen::Flag, &restaurarFabricaVar, 0, 1);
                  restaurarFabrica(restaurarFabricaVar); restaurarFabricaVar=false; 
@@ -527,8 +529,9 @@ void mostrarPantalla(){
   if ( btnPressed == Button::Ok )
     openMenu();
 
-
+  
   // Pinta la pantalla principal cada 1 segundo:
+  
   if ( tNow - tPrevious >= 1000 )  {
     tPrevious = tNow;
 
