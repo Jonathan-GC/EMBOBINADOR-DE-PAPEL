@@ -69,7 +69,7 @@ void secuenciaDeCorte(int vueltas){
   
   habilitarMotores(1);
   controller.rotate(gradosMotor*1,0,0);
-  gotear(18);
+  
   if(memory.d.modoAutomatico){
 
     //Esperar a que presione enter
@@ -95,10 +95,13 @@ void secuenciaDeCorte(int vueltas){
   stepperZ.rotate(-50);
   esperar(20);
 
+  //Gotear  y humedecer
+  gotear(120);
   for(byte i=0;i < 1;i++){
     //bajar a corte
     bajarAcorte();
     esperar(1100);
+    stepperZ.rotate(-15);
     
     //Subir a corte
     subirAcorte();
@@ -106,17 +109,22 @@ void secuenciaDeCorte(int vueltas){
   }
 
   controller.rotate(0,gradosMotor*2,0);
+  
   //Retrocede para evitar que se pegue el papel
   controller.rotate(-90,0,0);
   esperar(500);
-  for(byte i=0;i < 1;i++){
+  
+  for(byte i=0;i < 2;i++){
+    stepperZ.rotate(15);
     //bajar a corte
     bajarAcorte();
-    esperar(1100);
+    esperar(800);
     
     //Subir a corte
-    subirAcorte();
-    esperar(400);
+    Gripper.write(130);
+    stepperZ.rotate(-10);
+    esperar(100);
+    
   }
 
   //IR AL INICIO
@@ -343,7 +351,7 @@ void extraerVelocidades(short dato){
 
 void humectar(){
   //lo mando al final para que no moje carriles
-  gotear(100);
+  gotear(150);
   stepperZ.rotate(-limiteZ);
   Gripper.write(110);
   esperar(800);
