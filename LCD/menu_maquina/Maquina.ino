@@ -28,7 +28,7 @@ void configurar_maquina(){
     
     
     Gripper.write(ceroGripper);
-    gotear(50);
+    gotear(20);
     habilitarMotores(false);
   
 }
@@ -69,7 +69,7 @@ void secuenciaDeCorte(int vueltas){
   
   habilitarMotores(1);
   controller.rotate(gradosMotor*1,0,0);
-  gotear(40);
+  gotear(18);
   if(memory.d.modoAutomatico){
 
     //Esperar a que presione enter
@@ -92,7 +92,7 @@ void secuenciaDeCorte(int vueltas){
 
 
   //Desplazar a Z
-  stepperZ.rotate(-100);
+  stepperZ.rotate(-50);
   esperar(20);
 
   for(byte i=0;i < 1;i++){
@@ -187,10 +187,10 @@ void extraerPapel(){
 
   for(byte i = 0; i < memory.d.vecesDelGripper; i++){
     bajarAcorte();
-    esperar(1000);
+    esperar(500);
     stepperZ.rotate(-limiteZ);
     subirAcorte();
-    esperar(2000);
+    esperar(1500);
 
     boolean flag = false;
     
@@ -343,7 +343,7 @@ void extraerVelocidades(short dato){
 
 void humectar(){
   //lo mando al final para que no moje carriles
-  gotear(50);
+  gotear(100);
   stepperZ.rotate(-limiteZ);
   Gripper.write(110);
   esperar(800);
