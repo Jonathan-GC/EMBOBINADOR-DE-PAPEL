@@ -6,10 +6,111 @@
 #include <LiquidCrystal_I2C.h>
 #include <EEPROM.h>
 
+#include <Arduino.h>
+#include "MultiDriver.h"
+#include "SyncDriver.h"
+#include "BasicStepperDriver.h" // generic
+#include <Servo.h>
+
+#define STOPPER_PIN_Y 10
+#define STOPPER_PIN_Z 11
+#define RUN_PIN 9
+
+// Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
+#define MOTOR_STEPS 200
+
+
+
+// X motor
+#define DIR_X 2
+#define STEP_X 5
+
+// Y motor
+#define DIR_Y 3
+#define STEP_Y 6
+
+
+// Z motor
+#define DIR_Z 4
+#define STEP_Z 7
+#define limiteZ 800
+// If microstepping is set externally, make sure this matches the selected mode
+// 1=full step, 2=half step etc.
+#define MICROSTEPS 1
+
+//pin del Servo Gripper
+#define pinGripper 12
+#define pinHumectador A3
+
+short upGripper = 160, downGripper = 90, ceroGripper = 180;
+
+// Target RPM for X axis motor
+short MOTOR_X_RPM;
+// Target RPM for Y axis motor
+short MOTOR_Y_RPM;
+// Target RPM for Z axis motor
+short MOTOR_Z_RPM;
+
+/*************************************
+  DECLARACION DE OBJETOS PRINCIPALES
+*************************************/
+//Declaracion de motores
+BasicStepperDriver stepperX(MOTOR_STEPS, DIR_X, STEP_X);
+BasicStepperDriver stepperY(MOTOR_STEPS, DIR_Y, STEP_Y);
+BasicStepperDriver stepperZ(MOTOR_STEPS, DIR_Z, STEP_Z);
+
+//Declaracion del controlador
+SyncDriver controller(stepperX, stepperY, stepperZ);
+
+// Declaracion del objeto Servo
+Servo Gripper;
+/*************************************
+*************************************/
+
+
+
+
 /**
     OBJETOS DE LAS LIBRERIAS
 */
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); //Configuracion del LCD I2C (puede ser necesario cambiar el primer valor con la direccion del LCD)
+
+//****************************************
+//definiciones de Funcionamiento
+//****************************************
+#define diametroTambor  44
+#define pi              3.1416
+
+
+//----------------------------------------
+
+
+//****************************************
+//Variables de Funcionamiento
+//****************************************
+short gradosMotor;
+short goToHomeVar = false;
+short goToAlimentar = false;
+short goToDesactivar = false;
+short selectorConfiguracion;
+short startProduccion= false;
+short restaurarFabricaVar=false;
+short ModoAutomatico=false;
+
+//----------------------------------------
+
+//****************************************
+//Funciones de Funcionamiento
+//****************************************
+void sacrGrados();
+  
+
+
+
+
+//----------------------------------------
+
+
 
 
 /**
@@ -35,36 +136,49 @@ const byte bARROW[]   = {                               // Bits icono flecha
 };
 
 enum Button { Unknown, Ok, Left, Right } btnPressed;    // Enumerador con los diferentes botones disponibles
-enum Screen { Menu1, Menu2, Flag, Number };             // Enumerador con los distintos tipos de submenus disponibles
+enum Screen { Menu1, Menu2, Menu3, Flag, Number };             // Enumerador con los distintos tipos de submenus disponibles
 
 const char *txMENU[] = {                                // Los textos del menu principal, la longitud maxima = columnsLCD-1, rellenar caracteres sobrantes con espacios.
-  "1.Home          ",
-  "2.Alimentar     ",
-  "3.Configuracion ",
-  "4.Informacion   ",
-  "5.Guardar       ",
-  "6.Salir         "
+  "1.Atras <<      ",
+  "2.INICIAR PRODUC",
+  "3.Home          ",
+  "4.Alimentar     ",
+  "5.Cuadro mm     ",
+  "6.Nro Cuadros   ",
+  "7.Gripper Out#  ",
+  "8.Mostrar Tiempo",
+  "9.Velocidad     ",
+  "10.Linea habiles",
+  "11.Produccion # ",
+  "12.Tiempo Goteo ",
+  "13.Gotear Manual",
+  "14.Guardar      ",
+  "15.Reset Fabrica",
+  "16.Modo         "
+  
 };
 
 const byte iMENU = COUNT(txMENU);                       // Numero de items/opciones del menu principal
 
 enum eSMENU1 { Milliseconds, Seconds, Minutes, Hours }; // Enumerador de las opciones disponibles del submenu 1 (tienen que seguir el mismo orden que los textos)
-const char *txSMENU1[] = {                              // Textos del submenu 1, longitud maxima = columnsLCD-2, rellenar caracteres sobrantes con espacios
-  "3.1.Tamaño      ",
-  "3.2.Velocidad   ",
-  "3.3.Corte       ",
-  "      otro       "
-
+const char *txSMENU1[] = {        // Textos del submenu 1, longitud maxima = columnsLCD-2, rellenar caracteres sobrantes con espacios
+  "  Milisegundos  ",
+  "    Segundos    ",
+  "     Minutos    ",
+  "     Horas      "
 };
 
-enum eSMENU2 { GradeC, GradeF };  // Enumerador de las opciones disponibles del submenu 2 (tienen que seguir el mismo orden que los textos)
+enum eSMENU2 {Automatico, Manual };  // Enumerador de las opciones disponibles del submenu 2 (tienen que seguir el mismo orden que los textos)
 const char *txSMENU2[] = {        // Textos del submenu 1, longitud maxima = columnsLCD-2, rellenar caracteres sobrantes con espacios
-  "     Grados C     ",
-  "     Grados F     "
+  "   Automatico   ",
+  "     Manual     "
 };
 
 /* ESTRUCTURAS CONFIGURACION */
 struct MYDATA {         // Estructura STRUCT con las variables que almacenaran los datos que se guardaran en la memoria EEPROM
+  int sizeCuadre;
+  
+  
   int initialized;
   int time_show;
   int time_unit;
@@ -74,6 +188,16 @@ struct MYDATA {         // Estructura STRUCT con las variables que almacenaran l
   int temp_unit;
   int temp_x;
   int temp_y;
+  short tamanioCuadro;
+  short velocidad;
+  short numeroDeCuadros;
+  short numeroDeProduccion;
+  short vecesDelGripper;
+  long  metrosEnrrollados;
+  short lineasCargadas;
+  short NroCuadros;
+  short modoAutomatico;
+  short tiempoGoteo;
 };
 union MEMORY {     // Estructura UNION para facilitar la lectura y escritura en la EEPROM de la estructura STRUCT
   MYDATA d;
@@ -86,6 +210,11 @@ memory;
    INICIO Y CONFIGURACION DEL PROGRAMA
 */
 void setup() {
+ 
+
+  Serial.begin(115200);
+  
+  
   pinMode(pENCO_SW,  INPUT_PULLUP);
   pinMode(pENCO_DT,  INPUT_PULLUP);
   pinMode(pENCO_CLK, INPUT_PULLUP);
@@ -97,6 +226,7 @@ void setup() {
   lcd.begin(columnsLCD, rowsLCD);
   lcd.createChar(iARROW, bARROW);
 
+  
   // Imprime la informacion del proyecto:
   lcd.setCursor(0, 0); lcd.print("    Maquina.    ");
   lcd.setCursor(0, 1); lcd.print("  Embobinadora  ");
@@ -106,10 +236,10 @@ void setup() {
   lcd.setCursor(0, 1); lcd.print("Tel: 3054791784");
   delay (2000);  lcd.clear();
 
-  lcd.setCursor(0, 0); lcd.print(" Regi  Basculas ");
+  lcd.setCursor(0, 0); lcd.print("  RegiBasculas  ");
   lcd.setCursor(0, 1); lcd.print("   del Tolima   ");
   delay (5000);  lcd.clear();
-
+  
   
   lcd.setCursor(0, 0); lcd.print("  Configurando  ");
   lcd.setCursor(0, 1);
@@ -120,68 +250,36 @@ void setup() {
   }
   lcd.clear();
 
+  //Funcion para sacar los grados de la maquina segun papel
+  gradosMotor = int(sacarGrados());
+
+  configurar_maquina();
+  
+
 }
+
+ //char dato=0; linea para borrar
+ unsigned long Contador = 0;
+ unsigned long TiempoAhora=0, periodo=5000;
+
 
 /**
    PROGRAMA PRINCIPAL
 */
 void loop() {
-  static unsigned long tNow      = 0;
-  static unsigned long tPrevious = 0;
+  mostrarPantalla();
 
-  tNow = millis();
-  btnPressed = readButtons();
-
-
-  if ( btnPressed == Button::Ok )
-    openMenu();
-
-
-  // Pinta la pantalla principal cada 1 segundo:
-  if ( tNow - tPrevious >= 1000 )  {
-    tPrevious = tNow;
-
-    if ( memory.d.time_show == 1 || memory.d.temp_show == 1 )
-      lcd.clear();
-
-    if ( memory.d.time_show == 1 )
-    {
-      lcd.setCursor(memory.d.time_x, memory.d.time_y);
-      switch ( memory.d.time_unit )      {
-        case eSMENU1::Milliseconds:
-          lcd.print(tNow);
-          lcd.print(" Mil");
-          break;
-        case eSMENU1::Seconds:
-          lcd.print(tNow / 1000);
-          lcd.print(" Seg");
-          break;
-        case eSMENU1::Minutes:
-          lcd.print(tNow / 1000 / 60);
-          lcd.print(" Min");
-          break;
-        case eSMENU1::Hours:
-          lcd.print(tNow / 1000 / 60 / 60);
-          lcd.print(" Hor");
-          break;
-      }
-    }
-
-    if ( memory.d.temp_show == 1 )
-    {
-      lcd.setCursor(memory.d.temp_x, memory.d.temp_y);
-      switch ( memory.d.temp_unit )
-      {
-        case eSMENU2::GradeC:
-          //lcd.print(getTemp());
-          lcd.print(" C");
-          break;
-        case eSMENU2::GradeF:
-          //lcd.print(1.8 * getTemp() + 32);
-          lcd.print(" F");
-          break;
-      }
-    }
+  if(goToAlimentar){
+    funcionPrincipalMaquina('a');
+    goToAlimentar = false;
+  }
+  else if(goToHomeVar){
+    funcionPrincipalMaquina('h');
+    goToHomeVar = false;
+  }
+  else if(startProduccion){
+    funcionPrincipalMaquina('t');
+    startProduccion=false;
   }
 
 }
@@ -209,16 +307,30 @@ void openMenu() {
     else if ( btnPressed == Button::Ok )    {
       switch ( idxMenu )
       {
-        case 0: openSubMenu( idxMenu, Screen::Flag,   &memory.d.time_show, 0, 1); break;
-        case 2: openSubMenu( idxMenu, Screen::Menu1,  &memory.d.time_unit, 0, COUNT(txSMENU1) - 1 ); break;
-        case 1: openSubMenu( idxMenu, Screen::Number, &memory.d.time_x, 0, columnsLCD - 1 ); break;
-        //case 3: openSubMenu( idxMenu, Screen::Number, &memory.d.time_y,    0, rowsLCD - 1         ); break;
-        //case 8: openSubMenu( idxMenu, Screen::Flag,   &memory.d.temp_show, 0, 1                 ); break;
-        //case 9: openSubMenu( idxMenu, Screen::Menu2,  &memory.d.temp_unit, 0, COUNT(txSMENU2) - 1 ); break;
-        //case 6: openSubMenu( idxMenu, Screen::Number, &memory.d.temp_x,    0, columnsLCD - 1      ); break;
-        //case 7: openSubMenu( idxMenu, Screen::Number, &memory.d.temp_y,    0, rowsLCD - 1         ); break;
-        case 4: writeConfiguration(); exitMenu = true;                                             break; //Salir y guardar
-        case 5: readConfiguration();  exitMenu = true;                                             break; //Salir y cancelar cambios
+        //openSubMenu( byte menuID, Screen screen, int *value, int minValue, int maxValue )
+        case 0: readConfiguration();  exitMenu = true; break; //Salir y cancelar cambios
+        case 1: openSubMenu( idxMenu, Screen::Flag, &startProduccion, 0, 1); exitMenu = true; break;
+        case 2: openSubMenu( idxMenu, Screen::Flag,   &goToHomeVar, 0, 1); exitMenu = true; break;
+        case 3: openSubMenu( idxMenu, Screen::Number, &goToAlimentar,    0, 4);exitMenu = true; break; 
+        case 4: openSubMenu( idxMenu, Screen::Number, &memory.d.tamanioCuadro, 80, 200); break;
+        case 5: openSubMenu( idxMenu, Screen::Number, &memory.d.NroCuadros, 0, 20); break;
+        case 6: openSubMenu( idxMenu, Screen::Number, &memory.d.vecesDelGripper, 0, 4); break;
+        case 7: openSubMenu( idxMenu, Screen::Menu1,  &memory.d.time_unit, 0, COUNT(txSMENU1) - 1 ); break;
+        case 8: openSubMenu( idxMenu, Screen::Number, &memory.d.velocidad, 70, 150); break;
+        case 9: openSubMenu( idxMenu, Screen::Number, &memory.d.lineasCargadas, 0, 3); break;
+        case 10: openSubMenu( idxMenu, Screen::Number, &memory.d.numeroDeProduccion, 0, 100 ); break;
+        case 11: openSubMenu( idxMenu, Screen::Number, &memory.d.tiempoGoteo, 0, 1000); break;
+        case 12: goteoManual(); break;
+        case 13: writeConfiguration(); exitMenu = true; break; //Salir y guardar
+        case 14: lcd.clear();lcd.print("Reset Fabrica?");esperar(3000); 
+                 openSubMenu( idxMenu, Screen::Flag, &restaurarFabricaVar, 0, 1);
+                 restaurarFabrica(restaurarFabricaVar); restaurarFabricaVar=false; 
+                 //realiza  el cambio nuevamente
+                 restaurarFabrica(restaurarFabricaVar); 
+                 exitMenu = true; 
+                 break;
+        case 15: openSubMenu( idxMenu, Screen::Menu2,  &memory.d.modoAutomatico, 0, COUNT(txSMENU2)-1 ); Serial.println(memory.d.modoAutomatico); break;        
+
       }
       forcePrint = true;
     }
@@ -320,7 +432,7 @@ void openSubMenu( byte menuID, Screen screen, int *value, int minValue, int maxV
       else if ( screen == Screen::Flag )
       {
         lcd.setCursor(columnsLCD / 2 - 1, 1);
-        lcd.print(*value == 0 ? "NO" : "SI");
+        lcd.print(*value == 1 ? "SI" : "NO");
       }
       else if ( screen == Screen::Number )
       {
@@ -345,15 +457,24 @@ void readConfiguration()
     memory.b[i] = EEPROM.read(i);
 
   if ( memory.d.initialized != 'Y' )  {
+    Serial.println("entro en initialized");
     memory.d.initialized = 'Y';
     memory.d.time_show   = 1;
-    memory.d.time_unit   = 1;
+    memory.d.time_unit   = 2;
     memory.d.time_x      = 0;
     memory.d.time_y      = 0;
-    memory.d.temp_show   = 1;
-    memory.d.temp_unit   = 0;
-    memory.d.temp_x      = 0;
-    memory.d.temp_y      = 1;
+
+    memory.d.tamanioCuadro= 105;
+    memory.d.velocidad = 100;
+    memory.d.numeroDeCuadros = 10;
+    memory.d.numeroDeProduccion = 5;
+    memory.d.vecesDelGripper = 2;
+    memory.d.metrosEnrrollados = 0;
+    memory.d.lineasCargadas = 3;
+    memory.d.NroCuadros=10;
+    memory.d.modoAutomatico=false;
+    memory.d.tiempoGoteo = 100;
+
     writeConfiguration();
   }
 }
@@ -376,6 +497,7 @@ void writeConfiguration()
         Al cambiar de tipo de teclado hay que adaptar tambien el resto de codigo para que haga uso de cada boton segun queramos.
 */
 Button readButtons() {
+  
   static boolean oldA = HIGH;
   static boolean newA = LOW;
   static boolean newB = LOW;
@@ -398,4 +520,88 @@ Button readButtons() {
 
   oldA = newA;
   return btnPressed;
+}
+
+
+void mostrarPantalla(){
+  static unsigned long tNow      = 0;
+  static unsigned long tPrevious = 0;
+
+  tNow = millis();
+  btnPressed = readButtons();
+  
+
+  //si presiona el boton despliega el menu
+  if ( btnPressed == Button::Ok )
+    openMenu();
+
+  
+  // Pinta la pantalla principal cada 1 segundo:
+  
+  if ( tNow - tPrevious >= 1000 )  {
+    tPrevious = tNow;
+
+    if ( memory.d.time_show == 1)
+      lcd.clear();
+
+    //Establecer el tiempor de maquina
+    if ( memory.d.time_show == 1 )
+    {
+      lcd.print("Tiempo: ");
+      lcd.setCursor(8, 0);
+      switch ( memory.d.time_unit )      {
+        case eSMENU1::Milliseconds:
+          lcd.print(tNow);
+          lcd.print(" Mil");
+          break;
+        case eSMENU1::Seconds:
+          lcd.print(tNow / 1000);
+          lcd.print(" Seg");
+          break;
+        case eSMENU1::Minutes:
+          lcd.print(tNow / 1000 / 60);
+          lcd.print(" Min");
+          break;
+        case eSMENU1::Hours:
+          lcd.print(tNow / 1000 / 60 / 60);
+          lcd.print(" Hor");
+          break;
+      }
+    }
+
+    //Establecer el perfil de los metros enrollados
+    lcd.setCursor(0,1);
+    lcd.print("Un: ");
+    lcd.print(memory.d.metrosEnrrollados);
+    lcd.print(" m: ");
+    double metraje;
+    metraje=(memory.d.tamanioCuadro*memory.d.NroCuadros);
+    metraje*=memory.d.lineasCargadas;
+    metraje/=1000;
+    //Serial.println(metraje);
+    lcd.print(memory.d.metrosEnrrollados*metraje);
+  }
+
+}
+
+void restaurarFabrica(boolean value){
+  if(value){
+    //Restaurar memoria cambia el valor a N
+    memory.d.initialized = 'N';
+    //Lo escribe en la configuracion!
+    writeConfiguration();
+
+    //Vuelve y lo manda a leer para cargar los datos
+    readConfiguration();
+  }else{
+
+    //Lo carga Con Y para que se pueda habilitar nuevamente la maquina 
+    memory.d.initialized = 'Y';
+    //Lo escribe en la configuracion!
+    writeConfiguration();
+    //Vuelve y lo manda a leer para cargar los datos
+    readConfiguration();
+    
+  }
+  
 }
