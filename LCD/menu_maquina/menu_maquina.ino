@@ -148,11 +148,13 @@ const char *txMENU[] = {                                // Los textos del menu p
   "7.Gripper Out#  ",
   "8.Mostrar Tiempo",
   "9.Velocidad     ",
-  "10.Lineas habiles",
+  "10.Linea habiles",
   "11.Produccion # ",
-  "12.Guardar      ",
-  "13.Reset Fabrica",
-  "14.Modo         "
+  "12.Tiempo Goteo ",
+  "13.Gotear Manual",
+  "14.Guardar      ",
+  "15.Reset Fabrica",
+  "16.Modo         "
   
 };
 
@@ -195,6 +197,7 @@ struct MYDATA {         // Estructura STRUCT con las variables que almacenaran l
   short lineasCargadas;
   short NroCuadros;
   short modoAutomatico;
+  short tiempoGoteo;
 };
 union MEMORY {     // Estructura UNION para facilitar la lectura y escritura en la EEPROM de la estructura STRUCT
   MYDATA d;
@@ -316,15 +319,17 @@ void openMenu() {
         case 8: openSubMenu( idxMenu, Screen::Number, &memory.d.velocidad, 70, 150); break;
         case 9: openSubMenu( idxMenu, Screen::Number, &memory.d.lineasCargadas, 0, 3); break;
         case 10: openSubMenu( idxMenu, Screen::Number, &memory.d.numeroDeProduccion, 0, 100 ); break;
-        case 11: writeConfiguration(); exitMenu = true; break; //Salir y guardar
-        case 12: lcd.clear();lcd.print("Reset Fabrica?");esperar(3000); 
+        case 11: openSubMenu( idxMenu, Screen::Number, &memory.d.tiempoGoteo, 0, 1000); break;
+        case 12: goteoManual(); break;
+        case 13: writeConfiguration(); exitMenu = true; break; //Salir y guardar
+        case 14: lcd.clear();lcd.print("Reset Fabrica?");esperar(3000); 
                  openSubMenu( idxMenu, Screen::Flag, &restaurarFabricaVar, 0, 1);
                  restaurarFabrica(restaurarFabricaVar); restaurarFabricaVar=false; 
                  //realiza  el cambio nuevamente
                  restaurarFabrica(restaurarFabricaVar); 
                  exitMenu = true; 
                  break;
-        case 13: openSubMenu( idxMenu, Screen::Menu2,  &memory.d.modoAutomatico, 0, COUNT(txSMENU2)-1 ); Serial.println(memory.d.modoAutomatico); break;        
+        case 15: openSubMenu( idxMenu, Screen::Menu2,  &memory.d.modoAutomatico, 0, COUNT(txSMENU2)-1 ); Serial.println(memory.d.modoAutomatico); break;        
 
       }
       forcePrint = true;
@@ -468,6 +473,7 @@ void readConfiguration()
     memory.d.lineasCargadas = 3;
     memory.d.NroCuadros=10;
     memory.d.modoAutomatico=false;
+    memory.d.tiempoGoteo = 100;
 
     writeConfiguration();
   }

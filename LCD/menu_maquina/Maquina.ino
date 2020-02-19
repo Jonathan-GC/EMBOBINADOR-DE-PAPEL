@@ -78,7 +78,7 @@ void secuenciaDeCorte(int vueltas){
     while(digitalRead(RUN_PIN)){
       lcd.print("   Continuar?   ");
       lcd.setCursor(1,0);
-      lcd.print("Presione Enter");
+      lcd.print("Presione RUN");
       
     }
     delay(200);
@@ -96,11 +96,11 @@ void secuenciaDeCorte(int vueltas){
   esperar(20);
 
   //Gotear  y humedecer
-  gotear(120);
-  for(byte i=0;i < 1;i++){
+  gotear(memory.d.tiempoGoteo);
+  for(byte i=0;i < 2;i++){
     //bajar a corte
     bajarAcorte();
-    esperar(1100);
+    esperar(900);
     stepperZ.rotate(-15);
     
     //Subir a corte
@@ -114,14 +114,14 @@ void secuenciaDeCorte(int vueltas){
   controller.rotate(-90,0,0);
   esperar(500);
   
-  for(byte i=0;i < 2;i++){
+  for(byte i=0;i < 1;i++){
     stepperZ.rotate(15);
     //bajar a corte
     bajarAcorte();
     esperar(800);
     
     //Subir a corte
-    Gripper.write(130);
+    Gripper.write(upGripper);
     stepperZ.rotate(-10);
     esperar(100);
     
@@ -351,7 +351,7 @@ void extraerVelocidades(short dato){
 
 void humectar(){
   //lo mando al final para que no moje carriles
-  gotear(150);
+  gotear(memory.d.tiempoGoteo+50);
   stepperZ.rotate(-limiteZ);
   Gripper.write(110);
   esperar(800);
@@ -363,4 +363,20 @@ void gotear(short espera){
   digitalWrite(pinHumectador,1);
   esperar(espera);
   digitalWrite(pinHumectador,0);
+}
+
+void goteoManual(){
+  lcd.clear();
+  lcd.print("Enter para Salir");
+  lcd.setCursor(0,1);
+  lcd.print("RUN para Gotear");
+  
+  do{
+    if(!digitalRead(RUN_PIN))
+      digitalWrite(pinHumectador,1);
+    else
+      digitalWrite(pinHumectador,0);
+  }while(digitalRead(pENCO_SW));
+
+  delay(300);
 }
