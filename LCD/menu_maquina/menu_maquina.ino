@@ -42,7 +42,7 @@
 #define pinGripper 12
 #define pinHumectador A3
 
-short upGripper = 160, downGripper = 90, ceroGripper = 180;
+short upGripper = 160, downGripper = 85, ceroGripper = 180;
 
 // Target RPM for X axis motor
 short MOTOR_X_RPM;
@@ -78,7 +78,7 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); //Configuracion d
 //****************************************
 //definiciones de Funcionamiento
 //****************************************
-#define diametroTambor  44
+#define diametroTambor  42
 #define pi              3.1416
 
 
@@ -151,10 +151,11 @@ const char *txMENU[] = {                                // Los textos del menu p
   "10.Linea habiles",
   "11.Produccion # ",
   "12.Tiempo Goteo ",
-  "13.Gotear Manual",
-  "14.Guardar      ",
-  "15.Reset Fabrica",
-  "16.Modo         "
+  "13.Tiempo humect",
+  "14.Gotear Manual",
+  "15.Guardar      ",
+  "16.Reset Fabrica",
+  "17.Modo         "
   
 };
 
@@ -198,6 +199,7 @@ struct MYDATA {         // Estructura STRUCT con las variables que almacenaran l
   short NroCuadros;
   short modoAutomatico;
   short tiempoGoteo;
+  short tiempoHumectacion;
 };
 union MEMORY {     // Estructura UNION para facilitar la lectura y escritura en la EEPROM de la estructura STRUCT
   MYDATA d;
@@ -251,7 +253,9 @@ void setup() {
   lcd.clear();
 
   //Funcion para sacar los grados de la maquina segun papel
+  
   gradosMotor = int(sacarGrados());
+  Serial.print("Grados Motor: "); Serial.println(gradosMotor); 
 
   configurar_maquina();
   
@@ -320,16 +324,18 @@ void openMenu() {
         case 9: openSubMenu( idxMenu, Screen::Number, &memory.d.lineasCargadas, 0, 3); break;
         case 10: openSubMenu( idxMenu, Screen::Number, &memory.d.numeroDeProduccion, 0, 100 ); break;
         case 11: openSubMenu( idxMenu, Screen::Number, &memory.d.tiempoGoteo, 0, 1000); break;
-        case 12: goteoManual(); break;
-        case 13: writeConfiguration(); exitMenu = true; break; //Salir y guardar
-        case 14: lcd.clear();lcd.print("Reset Fabrica?");esperar(3000); 
+        case 12: openSubMenu( idxMenu, Screen::Number, &memory.d.tiempoHumectacion, 0, 1000); break;
+        
+        case 13: goteoManual(); break;
+        case 14: writeConfiguration(); exitMenu = true; break; //Salir y guardar
+        case 15: lcd.clear();lcd.print("Reset Fabrica?");esperar(3000); 
                  openSubMenu( idxMenu, Screen::Flag, &restaurarFabricaVar, 0, 1);
                  restaurarFabrica(restaurarFabricaVar); restaurarFabricaVar=false; 
                  //realiza  el cambio nuevamente
                  restaurarFabrica(restaurarFabricaVar); 
                  exitMenu = true; 
                  break;
-        case 15: openSubMenu( idxMenu, Screen::Menu2,  &memory.d.modoAutomatico, 0, COUNT(txSMENU2)-1 ); Serial.println(memory.d.modoAutomatico); break;        
+        case 16: openSubMenu( idxMenu, Screen::Menu2,  &memory.d.modoAutomatico, 0, COUNT(txSMENU2)-1 ); Serial.println(memory.d.modoAutomatico); break;        
 
       }
       forcePrint = true;
@@ -474,7 +480,7 @@ void readConfiguration()
     memory.d.NroCuadros=10;
     memory.d.modoAutomatico=false;
     memory.d.tiempoGoteo = 100;
-
+    memory.d.tiempoHumectacion = 45;
     writeConfiguration();
   }
 }
@@ -534,6 +540,8 @@ void mostrarPantalla(){
   //si presiona el boton despliega el menu
   if ( btnPressed == Button::Ok )
     openMenu();
+  else if ( btnPressed == Button::Left )
+    goteoManual();
 
   
   // Pinta la pantalla principal cada 1 segundo:
@@ -605,3 +613,6 @@ void restaurarFabrica(boolean value){
   }
   
 }
+
+
+//void leerMovimientoLateral()

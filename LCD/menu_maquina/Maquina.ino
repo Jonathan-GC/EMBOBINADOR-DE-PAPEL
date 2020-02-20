@@ -113,8 +113,9 @@ void secuenciaDeCorte(int vueltas){
   //Retrocede para evitar que se pegue el papel
   controller.rotate(-90,0,0);
   esperar(500);
-  
-  for(byte i=0;i < 1;i++){
+
+  //Segunda bajada
+  for(byte i=0;i < 0;i++){
     stepperZ.rotate(15);
     //bajar a corte
     bajarAcorte();
@@ -193,23 +194,29 @@ void extraerPapel(){
   //Avance Para Extraer Pwerfectamente
   stepperZ.rotate(40);
 
-  for(byte i = 0; i < memory.d.vecesDelGripper; i++){
-    bajarAcorte();
-    esperar(500);
-    stepperZ.rotate(-limiteZ);
-    subirAcorte();
-    esperar(1500);
-
-    boolean flag = false;
-    
-    do{
-      stepperZ.startRotate(20 * 360);
-      flag = goToHome_Z();
-    }while(!flag);
-    
+  if (memory.d.vecesDelGripper == 0){
+    esperar(2000);
   }
+  else{
+    
   
+    for(byte i = 0; i < memory.d.vecesDelGripper; i++){
+      bajarAcorte();
+      esperar(500);
+      stepperZ.rotate(-limiteZ);
+      subirAcorte();
+      esperar(1500);
   
+      boolean flag = false;
+      
+      do{
+        stepperZ.startRotate(20 * 360);
+        flag = goToHome_Z();
+      }while(!flag);
+      
+    }
+  
+  }
   
 }
 
@@ -351,7 +358,7 @@ void extraerVelocidades(short dato){
 
 void humectar(){
   //lo mando al final para que no moje carriles
-  gotear(memory.d.tiempoGoteo+50);
+  gotear(memory.d.tiempoHumectacion);
   stepperZ.rotate(-limiteZ);
   Gripper.write(110);
   esperar(800);
