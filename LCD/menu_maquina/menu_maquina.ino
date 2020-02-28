@@ -42,7 +42,7 @@
 #define pinGripper 12
 #define pinHumectador A3
 
-short upGripper = 160, downGripper = 85, ceroGripper = 180;
+short upGripper = 160, downGripper = 80, ceroGripper = 180;
 
 // Target RPM for X axis motor
 short MOTOR_X_RPM;

@@ -16,7 +16,9 @@ void configurar_maquina(){
     //Estraer las velocidades de la EEProm
     extraerVelocidades(memory.d.velocidad);
     //Configuracion del motores
-    stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
+    //A raiz de que descubrí que con 40 puntos abajo de la referencia el motorX mueve bien
+    //Se le quitan 40 puntos
+    stepperX.begin(MOTOR_X_RPM-55, MICROSTEPS);
     stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
     stepperZ.begin(MOTOR_Z_RPM, MICROSTEPS);
     
@@ -87,8 +89,8 @@ void secuenciaDeCorte(int vueltas){
   }
   
   
-  controller.rotate(gradosMotor*(vueltas-1),int(360*((vueltas-1)*1.5)),0);
-
+  //controller.rotate(gradosMotor*(vueltas-1),int(360*((vueltas-1)*1)),0);
+  controller.rotate(gradosMotor*(vueltas-1),int(360*vueltas*1.1),0);
 
 
   //Desplazar a Z
@@ -161,7 +163,7 @@ void subirAcorte(){
 
 boolean goToHome_Y(){
   habilitarMotores(true);
-  if (digitalRead(STOPPER_PIN_Y) == 0){
+  if (digitalRead(STOPPER_PIN_Y) == 1){
         //Serial.println("STOPPER REACHED");
         //stepperY.startBrake();
         stepperY.stop();
@@ -294,7 +296,7 @@ void funcionPrincipalMaquina(char dato){
             humectar();
             i_anterior = i;
           }
-          esperar(3000);
+          esperar(2000);
           
       }
       habilitarMotores(false);
@@ -360,7 +362,7 @@ void humectar(){
   //lo mando al final para que no moje carriles
   gotear(memory.d.tiempoHumectacion);
   stepperZ.rotate(-limiteZ);
-  Gripper.write(110);
+  Gripper.write(130);
   esperar(800);
   goToHome();
   
