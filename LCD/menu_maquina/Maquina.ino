@@ -70,8 +70,14 @@ void secuenciaDeCorte(int vueltas){
   mostrarPantalla();
   
   habilitarMotores(1);
+  //Para que no se demre alimentando
+  stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
   controller.rotate(gradosMotor*1,0,0);
-  
+
+  //para calibrar los motores nuevamente
+  stepperX.begin(MOTOR_X_RPM-55, MICROSTEPS);
+
+  //Modo automatico
   if(memory.d.modoAutomatico){
 
     //Esperar a que presione enter
@@ -94,7 +100,7 @@ void secuenciaDeCorte(int vueltas){
 
 
   //Desplazar a Z
-  stepperZ.rotate(-50);
+  stepperZ.rotate(-90);
   esperar(20);
 
   //Gotear  y humedecer

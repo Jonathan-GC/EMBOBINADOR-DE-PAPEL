@@ -42,7 +42,7 @@
 #define pinGripper 12
 #define pinHumectador A3
 
-short upGripper = 160, downGripper = 80, ceroGripper = 180;
+short upGripper = 160, downGripper = 70, ceroGripper = 180;
 
 // Target RPM for X axis motor
 short MOTOR_X_RPM;
@@ -471,16 +471,16 @@ void readConfiguration()
     memory.d.time_y      = 0;
 
     memory.d.tamanioCuadro= 105;
-    memory.d.velocidad = 100;
+    memory.d.velocidad = 120;
     memory.d.numeroDeCuadros = 10;
     memory.d.numeroDeProduccion = 5;
-    memory.d.vecesDelGripper = 2;
+    memory.d.vecesDelGripper = 0;
     memory.d.metrosEnrrollados = 0;
     memory.d.lineasCargadas = 3;
     memory.d.NroCuadros=10;
     memory.d.modoAutomatico=false;
-    memory.d.tiempoGoteo = 100;
-    memory.d.tiempoHumectacion = 45;
+    memory.d.tiempoGoteo = 20;
+    memory.d.tiempoHumectacion = 40;
     writeConfiguration();
   }
 }
