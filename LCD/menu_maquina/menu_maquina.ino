@@ -12,6 +12,8 @@
 #include "BasicStepperDriver.h" // generic
 #include <Servo.h>
 
+#define DEBUG 1
+
 #define STOPPER_PIN_Y 10
 #define STOPPER_PIN_Z 11
 #define RUN_PIN 9
@@ -24,7 +26,7 @@
 // X motor
 #define DIR_X 2
 #define STEP_X 5
-
+#define factorCompensacion 0
 // Y motor
 #define DIR_Y 3
 #define STEP_Y 6
@@ -228,29 +230,32 @@ void setup() {
   lcd.begin(columnsLCD, rowsLCD);
   lcd.createChar(iARROW, bARROW);
 
+  #if !DEBUG
+    // Imprime la informacion del proyecto:
+    lcd.setCursor(0, 0); lcd.print("    Maquina.    ");
+    lcd.setCursor(0, 1); lcd.print("  Embobinadora  ");
+    delay (2000);  lcd.clear();
   
-  // Imprime la informacion del proyecto:
-  lcd.setCursor(0, 0); lcd.print("    Maquina.    ");
-  lcd.setCursor(0, 1); lcd.print("  Embobinadora  ");
-  delay (2000);  lcd.clear();
-
-  lcd.setCursor(0, 0); lcd.print("    TecnoBot    ");
-  lcd.setCursor(0, 1); lcd.print("Tel: 3054791784");
-  delay (2000);  lcd.clear();
-
-  lcd.setCursor(0, 0); lcd.print("  RegiBasculas  ");
-  lcd.setCursor(0, 1); lcd.print("   del Tolima   ");
-  delay (5000);  lcd.clear();
+    lcd.setCursor(0, 0); lcd.print("    TecnoBot    ");
+    lcd.setCursor(0, 1); lcd.print("Tel: 3054791784");
+    delay (2000);  lcd.clear();
+  
+    lcd.setCursor(0, 0); lcd.print("  RegiBasculas  ");
+    lcd.setCursor(0, 1); lcd.print("   del Tolima   ");
+    delay (5000);  lcd.clear();
+    
+    
+    lcd.setCursor(0, 0); lcd.print("  Configurando  ");
+    lcd.setCursor(0, 1);
+    for ( int i = 0 ; i < columnsLCD ; i++ )
+    {
+      lcd.print(".");
+      delay(100);
+    }
+    lcd.clear();  
+  #endif
   
   
-  lcd.setCursor(0, 0); lcd.print("  Configurando  ");
-  lcd.setCursor(0, 1);
-  for ( int i = 0 ; i < columnsLCD ; i++ )
-  {
-    lcd.print(".");
-    delay(100);
-  }
-  lcd.clear();
 
   //Funcion para sacar los grados de la maquina segun papel
   

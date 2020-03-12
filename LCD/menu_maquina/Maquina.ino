@@ -18,8 +18,8 @@ void configurar_maquina(){
     //Configuracion del motores
     //A raiz de que descubrí que con 40 puntos abajo de la referencia el motorX mueve bien
     //Se le quitan 40 puntos
-    stepperX.begin(MOTOR_X_RPM-55, MICROSTEPS);
-    stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
+    stepperX.begin(MOTOR_X_RPM-factorCompensacion, MICROSTEPS);
+    stepperY.begin(MOTOR_Y_RPM-30, MICROSTEPS);
     stepperZ.begin(MOTOR_Z_RPM, MICROSTEPS);
     
     
@@ -75,7 +75,7 @@ void secuenciaDeCorte(int vueltas){
   controller.rotate(gradosMotor*1,0,0);
 
   //para calibrar los motores nuevamente
-  stepperX.begin(MOTOR_X_RPM-55, MICROSTEPS);
+  stepperX.begin(MOTOR_X_RPM-factorCompensacion, MICROSTEPS);
 
   //Modo automatico
   if(memory.d.modoAutomatico){
@@ -302,7 +302,7 @@ void funcionPrincipalMaquina(char dato){
             humectar();
             i_anterior = i;
           }
-          esperar(2000);
+          esperar(1000);
           
       }
       habilitarMotores(false);
