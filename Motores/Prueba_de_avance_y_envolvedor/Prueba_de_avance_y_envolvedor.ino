@@ -17,11 +17,11 @@
 // Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
 #define MOTOR_STEPS 200
 // Target RPM for X axis motor
-#define MOTOR_X_RPM 100
+#define MOTOR_X_RPM 150
 // Target RPM for Y axis motor
-#define MOTOR_Y_RPM 100
+#define MOTOR_Y_RPM 150
 // Target RPM for Z axis motor
-#define MOTOR_Z_RPM 100
+#define MOTOR_Z_RPM 150
 
 
 // X motor
@@ -78,12 +78,24 @@ void loop() {
 
     if(data == 'a'){
         pinMode(8,1); digitalWrite(8,0);
-        controller.rotate(287*2, 0,0);
-        delay(5000);
-       
-        controller.rotate(287*4,360*6,0);
-        controller.rotate(100,90,0);
-        controller.rotate(-100,0,0);
+        controller.rotate(253*3, 0,0);
+        delay(6000);
+        controller.rotate(1012*3, 450*3,0);
+        delay(2000);
+        controller.rotate(1012*5, 365*5,0);
+        delay(2000);
+        controller.rotate(253*5, 150*2,0);
+        delay(1000);
+        controller.rotate(-200*1,0,0);
+        /*
+        controller.rotate(1012*1,360*0,0);
+        controller.rotate(1012*1,360*1,0);
+        controller.rotate(1012*1,360*0,0);
+        controller.rotate(1012*1,360*4,0);
+        */
+        
+        //controller.rotate(100,90,0);
+        //controller.rotate(-100,0,0);
         //controller.rotate(0,360*2,0);
        // controller.rotate(0,0,10);
        // controller.rotate(0,0,0);

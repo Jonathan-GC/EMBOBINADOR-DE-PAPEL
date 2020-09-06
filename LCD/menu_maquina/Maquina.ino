@@ -18,8 +18,8 @@ void configurar_maquina(){
     //Configuracion del motores
     //A raiz de que descubrí que con 40 puntos abajo de la referencia el motorX mueve bien
     //Se le quitan 40 puntos
-    stepperX.begin(MOTOR_X_RPM-factorCompensacion, MICROSTEPS);
-    stepperY.begin(MOTOR_Y_RPM-30, MICROSTEPS);
+    stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
+    stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
     stepperZ.begin(MOTOR_Z_RPM, MICROSTEPS);
     
     
@@ -68,14 +68,16 @@ void secuenciaDeCorte(int vueltas){
   Serial.println(vueltas);
 
   mostrarPantalla();
-  
+  stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
+  stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
+  stepperZ.begin(MOTOR_Z_RPM, MICROSTEPS);
   habilitarMotores(1);
   //Para que no se demre alimentando
-  stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
-  controller.rotate(gradosMotor*1,0,0);
+  //stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
+  controller.rotate((gradosMotor/2)*3,0,0);
 
   //para calibrar los motores nuevamente
-  stepperX.begin(MOTOR_X_RPM-factorCompensacion, MICROSTEPS);
+  //stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
 
   //Modo automatico
   if(memory.d.modoAutomatico){
@@ -96,9 +98,11 @@ void secuenciaDeCorte(int vueltas){
   
   
   //controller.rotate(gradosMotor*(vueltas-1),int(360*((vueltas-1)*1)),0);
-  controller.rotate(gradosMotor*(vueltas-1),int(360*vueltas*1.1),0);
-
-
+  //controller.rotate(gradosMotor*(vueltas-1),int(360*vueltas*1.1),0);
+  controller.rotate(gradosMotor*(3), 450*3,0);
+  controller.rotate(gradosMotor*(5), 365*5,0);
+  controller.rotate((gradosMotor/2)*1,150*1,0);
+  controller.rotate(-200*1,0,0);
   //Desplazar a Z
   stepperZ.rotate(-90);
   esperar(20);
