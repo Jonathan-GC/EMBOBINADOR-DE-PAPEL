@@ -325,7 +325,7 @@ void openMenu() {
         case 5: openSubMenu( idxMenu, Screen::Number, &memory.d.NroCuadros, 0, 20); break;
         case 6: openSubMenu( idxMenu, Screen::Number, &memory.d.vecesDelGripper, 0, 4); break;
         case 7: openSubMenu( idxMenu, Screen::Menu1,  &memory.d.time_unit, 0, COUNT(txSMENU1) - 1 ); break;
-        case 8: openSubMenu( idxMenu, Screen::Number, &memory.d.velocidad, 70, 150); break;
+        case 8: openSubMenu( idxMenu, Screen::Number, &memory.d.velocidad, 100, 400); break;
         case 9: openSubMenu( idxMenu, Screen::Number, &memory.d.lineasCargadas, 0, 3); break;
         case 10: openSubMenu( idxMenu, Screen::Number, &memory.d.numeroDeProduccion, 0, 100 ); break;
         case 11: openSubMenu( idxMenu, Screen::Number, &memory.d.tiempoGoteo, 0, 1000); break;
@@ -464,9 +464,10 @@ void openSubMenu( byte menuID, Screen screen, int *value, int minValue, int maxV
 */
 void readConfiguration()
 {
-  for ( int i = 0 ; i < sizeof(memory.d) ; i++  )
+  for ( int i = 0 ; i < sizeof(memory.d) ; i++  ){
     memory.b[i] = EEPROM.read(i);
-
+    //Serial.println(memory.b[i]);
+  }
   if ( memory.d.initialized != 'Y' )  {
     Serial.println("entro en initialized");
     memory.d.initialized = 'Y';

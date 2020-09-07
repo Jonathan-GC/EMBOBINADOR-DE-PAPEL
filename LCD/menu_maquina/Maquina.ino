@@ -1,7 +1,13 @@
 float sacarGrados(){
   //return (memory.d.tamanioCuadro*360)/(diametroTambor * pi);
   unsigned int flag = memory.d.tamanioCuadro*360;
+  #if DEBUG
+  Serial.print("Sacar grados num 1: "); Serial.println(flag);
+  #endif
   unsigned int flag2 = (diametroTambor * pi);
+  #if DEBUG
+  Serial.print("Sacar grados num 2: "); Serial.println(flag2);
+  #endif
   return (flag)/flag2;
 }
 
@@ -68,16 +74,10 @@ void secuenciaDeCorte(int vueltas){
   Serial.println(vueltas);
 
   mostrarPantalla();
-  stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
-  stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
-  stepperZ.begin(MOTOR_Z_RPM, MICROSTEPS);
   habilitarMotores(1);
-  //Para que no se demre alimentando
-  //stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
-  controller.rotate((gradosMotor/2)*3,0,0);
-
-  //para calibrar los motores nuevamente
-  //stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
+  //Para alimentar los tenedores
+  controller.rotate(int((gradosMotor/4)*(vueltas*0.3)),0,0);
+  //controller.rotate(255*3,0,0);
 
   //Modo automatico
   if(memory.d.modoAutomatico){
@@ -99,10 +99,11 @@ void secuenciaDeCorte(int vueltas){
   
   //controller.rotate(gradosMotor*(vueltas-1),int(360*((vueltas-1)*1)),0);
   //controller.rotate(gradosMotor*(vueltas-1),int(360*vueltas*1.1),0);
-  controller.rotate(gradosMotor*(3), 450*3,0);
-  controller.rotate(gradosMotor*(5), 365*5,0);
-  controller.rotate((gradosMotor/2)*1,150*1,0);
-  controller.rotate(-200*1,0,0);
+  controller.rotate(int(gradosMotor* (vueltas*0.3)), int(440*(vueltas*0.3)),0);
+  controller.rotate(int(gradosMotor* (vueltas*0.5)), int(365*(vueltas*0.5)),0);
+  //controller.rotate((gradosMotor/4)*5,150*2,0);
+  controller.rotate(int((gradosMotor/4)*(vueltas*0.5)),int(150*(vueltas*0.5)),0);
+  controller.rotate(-(gradosMotor/4),0,0);
   //Desplazar a Z
   stepperZ.rotate(-90);
   esperar(20);
@@ -120,7 +121,7 @@ void secuenciaDeCorte(int vueltas){
     esperar(400);
   }
 
-  controller.rotate(0,gradosMotor*2,0);
+  //controller.rotate(0,gradosMotor*2,0);
   
   //Retrocede para evitar que se pegue el papel
   controller.rotate(-90,0,0);

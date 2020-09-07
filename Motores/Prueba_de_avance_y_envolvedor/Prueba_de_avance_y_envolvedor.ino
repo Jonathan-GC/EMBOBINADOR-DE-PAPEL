@@ -78,13 +78,13 @@ void loop() {
 
     if(data == 'a'){
         pinMode(8,1); digitalWrite(8,0);
-        controller.rotate(253*3, 0,0);
+        controller.rotate(255*3, 0,0);
         delay(6000);
-        controller.rotate(1012*3, 450*3,0);
+        controller.rotate(1021*3, 440*3,0);
         delay(2000);
-        controller.rotate(1012*5, 365*5,0);
+        controller.rotate(1021*5, 365*5,0);
         delay(2000);
-        controller.rotate(253*5, 150*2,0);
+        controller.rotate(255*5, 150*2,0);
         delay(1000);
         controller.rotate(-200*1,0,0);
         /*
