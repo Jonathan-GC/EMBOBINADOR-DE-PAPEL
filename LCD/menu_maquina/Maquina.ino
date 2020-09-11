@@ -1,13 +1,7 @@
 float sacarGrados(){
   //return (memory.d.tamanioCuadro*360)/(diametroTambor * pi);
   unsigned int flag = memory.d.tamanioCuadro*360;
-  #if DEBUG
-  Serial.print("Sacar grados num 1: "); Serial.println(flag);
-  #endif
   unsigned int flag2 = (diametroTambor * pi);
-  #if DEBUG
-  Serial.print("Sacar grados num 2: "); Serial.println(flag2);
-  #endif
   return (flag)/flag2;
 }
 
@@ -26,7 +20,7 @@ void configurar_maquina(){
     //Se le quitan 40 puntos
     stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
     stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
-    stepperZ.begin(MOTOR_Z_RPM, MICROSTEPS);
+    stepperZ.begin(MOTOR_Z_RPM-200, MICROSTEPS);
     
     
     //Configuracion de pines finales de carrera
@@ -75,9 +69,12 @@ void secuenciaDeCorte(int vueltas){
 
   mostrarPantalla();
   habilitarMotores(1);
-  //Para alimentar los tenedores
-  controller.rotate(int((gradosMotor/4)*(vueltas*0.3)),0,0);
-  //controller.rotate(255*3,0,0);
+  //Para que no se demre alimentando
+  //stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
+  controller.rotate((gradosMotor/2)*3,0,0);
+
+  //para calibrar los motores nuevamente
+  //stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
 
   //Modo automatico
   if(memory.d.modoAutomatico){
@@ -99,34 +96,35 @@ void secuenciaDeCorte(int vueltas){
   
   //controller.rotate(gradosMotor*(vueltas-1),int(360*((vueltas-1)*1)),0);
   //controller.rotate(gradosMotor*(vueltas-1),int(360*vueltas*1.1),0);
-  controller.rotate(int(gradosMotor* (vueltas*0.3)), int(440*(vueltas*0.3)),0);
-  controller.rotate(int(gradosMotor* (vueltas*0.5)), int(365*(vueltas*0.5)),0);
-  //controller.rotate((gradosMotor/4)*5,150*2,0);
-  controller.rotate(int((gradosMotor/4)*(vueltas*0.5)),int(150*(vueltas*0.5)),0);
-  controller.rotate(-(gradosMotor/4),0,0);
+  controller.rotate(gradosMotor*(3), 450*3,0);
+  controller.rotate(gradosMotor*(5), 365*5,0);
+  controller.rotate((gradosMotor/2)*1,150*1,0);
+  controller.rotate(-200*1,0,0);
   //Desplazar a Z
-  stepperZ.rotate(-90);
+  stepperZ.rotate(-350);
   esperar(20);
 
   //Gotear  y humedecer
   gotear(memory.d.tiempoGoteo);
-  for(byte i=0;i < 2;i++){
+  for(byte i=0;i < 1;i++){
     //bajar a corte
     bajarAcorte();
     esperar(900);
-    stepperZ.rotate(-15);
+    //stepperZ.rotate(-15);
     
     //Subir a corte
     subirAcorte();
     esperar(400);
   }
 
-  //controller.rotate(0,gradosMotor*2,0);
+  //stepperY.rotate(450*2);
   
   //Retrocede para evitar que se pegue el papel
-  controller.rotate(-90,0,0);
+  //controller.rotate(-90,0,0);
   esperar(500);
-
+  //
+  
+  //stepperZ.begin(100, MICROSTEPS);
   //Segunda bajada
   for(byte i=0;i < 0;i++){
     stepperZ.rotate(15);
@@ -144,7 +142,7 @@ void secuenciaDeCorte(int vueltas){
   //IR AL INICIO
   boolean flag = false;
   do{
-     stepperY.startRotate(10 * 360);
+     stepperY.startRotate(2* 460);
      flag = goToHome_Y();
   }while(!flag);
 

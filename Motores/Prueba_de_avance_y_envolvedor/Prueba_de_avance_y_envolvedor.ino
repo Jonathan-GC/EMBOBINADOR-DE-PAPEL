@@ -136,7 +136,8 @@ void loop() {
        
         if(data == 'w'){
           pinMode(8,1); digitalWrite(8,0);
-          controller.rotate(-1012 * 10,0,0);   
+          //controller.rotate(-1012 * 10,0,0);
+          stepperZ.rotate(-280);   
        }
 
     /*
