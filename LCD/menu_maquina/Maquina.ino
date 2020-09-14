@@ -67,6 +67,9 @@ void secuenciaDeCorte(int vueltas){
   Serial.print("entra: ");
   Serial.println(vueltas);
 
+  //esto es interpuesto para corregir el drama del goto Home
+  stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
+  
   mostrarPantalla();
   habilitarMotores(1);
   //Para que no se demre alimentando
@@ -101,7 +104,7 @@ void secuenciaDeCorte(int vueltas){
   controller.rotate((gradosMotor/2)*1,150*1,0);
   controller.rotate(-200*1,0,0);
   //Desplazar a Z
-  stepperZ.rotate(-350);
+  stepperZ.rotate(-470);
   esperar(20);
 
   //Gotear  y humedecer
@@ -109,7 +112,7 @@ void secuenciaDeCorte(int vueltas){
   for(byte i=0;i < 1;i++){
     //bajar a corte
     bajarAcorte();
-    esperar(900);
+    esperar(1000);
     //stepperZ.rotate(-15);
     
     //Subir a corte
@@ -121,7 +124,7 @@ void secuenciaDeCorte(int vueltas){
   
   //Retrocede para evitar que se pegue el papel
   //controller.rotate(-90,0,0);
-  esperar(500);
+  esperar(200);
   //
   
   //stepperZ.begin(100, MICROSTEPS);
@@ -141,6 +144,7 @@ void secuenciaDeCorte(int vueltas){
 
   //IR AL INICIO
   boolean flag = false;
+  stepperY.begin(100, MICROSTEPS);
   do{
      stepperY.startRotate(2* 460);
      flag = goToHome_Y();
@@ -151,14 +155,14 @@ void secuenciaDeCorte(int vueltas){
   //Funcion para extraer papel
   extraerPapel();
 
-  controller.rotate(90,0,0);
+  //controller.rotate(90,0,0);
   flag = false;
   do{
      stepperZ.startRotate(10 * 360);
      flag = goToHome_Z();
   }while(!flag);
 
-
+  stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
   
 }
 
@@ -166,7 +170,7 @@ void bajarAcorte(){
   Gripper.write(downGripper);
 }
 
-void subirAcorte(){
+void subirAcorte(){    
   Gripper.write(upGripper);
 }
 
@@ -252,8 +256,9 @@ void goToHome (){
     Gripper.write(upGripper);
 
     boolean flag = false;
+    stepperY.begin(100, MICROSTEPS);
     do{
-      stepperY.startRotate(100 * -360);
+      stepperY.startRotate(10 * 360);
       flag = goToHome_Y();
     }while(!flag);
 
