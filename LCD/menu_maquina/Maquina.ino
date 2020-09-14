@@ -73,11 +73,11 @@ void secuenciaDeCorte(int vueltas){
   mostrarPantalla();
   habilitarMotores(1);
   //Para que no se demre alimentando
-  //stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
+  stepperX.begin(300, MICROSTEPS);
   controller.rotate((gradosMotor/2)*3,0,0);
 
   //para calibrar los motores nuevamente
-  //stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
+  stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
 
   //Modo automatico
   if(memory.d.modoAutomatico){
@@ -100,7 +100,7 @@ void secuenciaDeCorte(int vueltas){
   //controller.rotate(gradosMotor*(vueltas-1),int(360*((vueltas-1)*1)),0);
   //controller.rotate(gradosMotor*(vueltas-1),int(360*vueltas*1.1),0);
   controller.rotate(gradosMotor*(3), 450*3,0);
-  controller.rotate(gradosMotor*(5), 365*5,0);
+  controller.rotate(gradosMotor*(5), 375*5,0);
   controller.rotate((gradosMotor/2)*1,150*1,0);
   controller.rotate(-200*1,0,0);
   //Desplazar a Z
