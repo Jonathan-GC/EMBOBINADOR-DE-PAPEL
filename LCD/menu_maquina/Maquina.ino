@@ -73,7 +73,9 @@ void secuenciaDeCorte(int vueltas){
   mostrarPantalla();
   habilitarMotores(1);
   //Para que no se demre alimentando
-  stepperX.begin(300, MICROSTEPS);
+  stepperX.begin(350
+  
+  , MICROSTEPS);
   controller.rotate((gradosMotor/2)*3,0,0);
 
   //para calibrar los motores nuevamente
@@ -310,7 +312,7 @@ void funcionPrincipalMaquina(char dato){
             humectar();
             i_anterior = i;
           }
-          esperar(1000);
+          esperar(500);
           
       }
       habilitarMotores(false);
