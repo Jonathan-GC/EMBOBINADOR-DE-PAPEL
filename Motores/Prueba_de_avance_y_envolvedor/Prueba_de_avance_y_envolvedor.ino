@@ -1,14 +1,4 @@
-/*
- * Multi-motor control (experimental)
- *
- * Move two or three motors at the same time.
- * This module is still work in progress and may not work well or at all.
- *
- * Copyright (C)2017 Laurentiu Badea
- *
- * This file may be redistributed under the terms of the MIT license.
- * A copy of this license has been included with this distribution in the file LICENSE.
- */
+
 #include <Arduino.h>
 #include "BasicStepperDriver.h"
 #include "MultiDriver.h"
@@ -17,11 +7,11 @@
 // Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
 #define MOTOR_STEPS 200
 // Target RPM for X axis motor
-#define MOTOR_X_RPM 120
+#define MOTOR_X_RPM 300
 // Target RPM for Y axis motor
-#define MOTOR_Y_RPM 100
+#define MOTOR_Y_RPM 300
 // Target RPM for Z axis motor
-#define MOTOR_Z_RPM 100
+#define MOTOR_Z_RPM 300
 
 
 // X motor
@@ -125,6 +115,11 @@ void loop() {
         if(data == 'w'){
           pinMode(8,1); digitalWrite(8,0);
           controller.rotate(-287 * 2,0,0);   
+       }
+
+       if(data == 'h'){
+          pinMode(8,1); digitalWrite(8,0);
+          controller.rotate(0,360*5,0);   
        }
 
     /*

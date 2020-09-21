@@ -139,7 +139,7 @@ void secuenciaDeCorte(int vueltas){
   //IR AL INICIO
   boolean flag = false;
   do{
-     stepperY.startRotate(10 * 360);
+     stepperY.startRotate(8 * 360);
      flag = goToHome_Y();
   }while(!flag);
 
