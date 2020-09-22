@@ -12,7 +12,7 @@
 #include "BasicStepperDriver.h" // generic
 #include <Servo.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define STOPPER_PIN_Y 10
 #define STOPPER_PIN_Z 11
@@ -234,15 +234,15 @@ void setup() {
     // Imprime la informacion del proyecto:
     lcd.setCursor(0, 0); lcd.print("    Maquina.    ");
     lcd.setCursor(0, 1); lcd.print("  Embobinadora  ");
-    delay (2000);  lcd.clear();
+    delay (800);  lcd.clear();
   
     lcd.setCursor(0, 0); lcd.print("    TecnoBot    ");
-    lcd.setCursor(0, 1); lcd.print("Tel: 3054791784");
+    lcd.setCursor(0, 1); lcd.print("Tel: 3123218107");
     delay (2000);  lcd.clear();
   
     lcd.setCursor(0, 0); lcd.print("  RegiBasculas  ");
     lcd.setCursor(0, 1); lcd.print("   del Tolima   ");
-    delay (5000);  lcd.clear();
+    delay (1000);  lcd.clear();
     
     
     lcd.setCursor(0, 0); lcd.print("  Configurando  ");
@@ -250,7 +250,7 @@ void setup() {
     for ( int i = 0 ; i < columnsLCD ; i++ )
     {
       lcd.print(".");
-      delay(100);
+      delay(50);
     }
     lcd.clear();  
   #endif
@@ -477,7 +477,7 @@ void readConfiguration()
     memory.d.time_y      = 0;
 
     memory.d.tamanioCuadro= 105;
-    memory.d.velocidad = 120;
+    memory.d.velocidad = 350;
     memory.d.numeroDeCuadros = 10;
     memory.d.numeroDeProduccion = 5;
     memory.d.vecesDelGripper = 0;
@@ -485,7 +485,7 @@ void readConfiguration()
     memory.d.lineasCargadas = 3;
     memory.d.NroCuadros=10;
     memory.d.modoAutomatico=false;
-    memory.d.tiempoGoteo = 20;
+    memory.d.tiempoGoteo = 30;
     memory.d.tiempoHumectacion = 40;
     writeConfiguration();
   }

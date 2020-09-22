@@ -73,9 +73,7 @@ void secuenciaDeCorte(int vueltas){
   mostrarPantalla();
   habilitarMotores(1);
   //Para que no se demre alimentando
-  stepperX.begin(350
-  
-  , MICROSTEPS);
+  stepperX.begin(350, MICROSTEPS);
   controller.rotate((gradosMotor/2)*3,0,0);
 
   //para calibrar los motores nuevamente
@@ -104,6 +102,7 @@ void secuenciaDeCorte(int vueltas){
   controller.rotate(gradosMotor*(3), 450*3,0);
   controller.rotate(gradosMotor*(5), 375*5,0);
   controller.rotate((gradosMotor/2)*1,150*1,0);
+  esperar(200);
   controller.rotate(-200*1,0,0);
   //Desplazar a Z
   stepperZ.rotate(-470);
@@ -126,11 +125,12 @@ void secuenciaDeCorte(int vueltas){
   
   //Retrocede para evitar que se pegue el papel
   //controller.rotate(-90,0,0);
-  esperar(200);
+  //esperar(200);
   //
   
   //stepperZ.begin(100, MICROSTEPS);
   //Segunda bajada
+  /*
   for(byte i=0;i < 0;i++){
     stepperZ.rotate(15);
     //bajar a corte
@@ -143,10 +143,10 @@ void secuenciaDeCorte(int vueltas){
     esperar(100);
     
   }
-
+  */
   //IR AL INICIO
   boolean flag = false;
-  stepperY.begin(100, MICROSTEPS);
+  stepperY.begin(200, MICROSTEPS);
   do{
      stepperY.startRotate(2* 460);
      flag = goToHome_Y();
@@ -160,7 +160,7 @@ void secuenciaDeCorte(int vueltas){
   //controller.rotate(90,0,0);
   flag = false;
   do{
-     stepperZ.startRotate(10 * 360);
+     stepperZ.startRotate(5 * 360);
      flag = goToHome_Z();
   }while(!flag);
 
@@ -227,7 +227,7 @@ void extraerPapel(){
       boolean flag = false;
       
       do{
-        stepperZ.startRotate(20 * 360);
+        stepperZ.startRotate(9 * 360);
         flag = goToHome_Z();
       }while(!flag);
       
@@ -258,16 +258,16 @@ void goToHome (){
     Gripper.write(upGripper);
 
     boolean flag = false;
-    stepperY.begin(100, MICROSTEPS);
+    stepperY.begin(200, MICROSTEPS);
     do{
-      stepperY.startRotate(10 * 360);
+      stepperY.startRotate(9 * 360);
       flag = goToHome_Y();
     }while(!flag);
 
     flag = false;
     
     do{
-      stepperZ.startRotate(20 * 360);
+      stepperZ.startRotate(10 * 360);
       flag = goToHome_Z();
     }while(!flag);
 
