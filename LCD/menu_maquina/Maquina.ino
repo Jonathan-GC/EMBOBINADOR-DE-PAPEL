@@ -86,9 +86,20 @@ void secuenciaDeCorte(int vueltas){
     lcd.clear();
     habilitarMotores(false);
     while(digitalRead(RUN_PIN)){
-      lcd.print("   Continuar?   ");
-      lcd.setCursor(1,0);
-      lcd.print("Presione RUN");
+      lcd.setCursor(0,0);
+      lcd.print("Continuar:  RUN");
+      lcd.setCursor(0,1);
+      lcd.print("Humectar :  <<< ");
+
+
+      btnPressed = readButtons();
+  
+
+      //si presiona el boton despliega el menu goteo manual
+      if ( btnPressed == Button::Left ){
+        delay(100);
+        goteoManual();
+      }
       
     }
     delay(200);
@@ -105,7 +116,7 @@ void secuenciaDeCorte(int vueltas){
   esperar(200);
   controller.rotate(-200*1,0,0);
   //Desplazar a Z
-  stepperZ.rotate(-470);
+  stepperZ.rotate(-380);
   esperar(20);
 
   //Gotear  y humedecer

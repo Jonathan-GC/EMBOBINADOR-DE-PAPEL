@@ -44,7 +44,7 @@
 #define pinGripper 12
 #define pinHumectador A3
 
-short upGripper = 140, downGripper = 20, ceroGripper = 140;
+short upGripper = 175, downGripper = 30, ceroGripper = 170;
 
 // Target RPM for X axis motor
 short MOTOR_X_RPM;
@@ -242,7 +242,7 @@ void setup() {
   
     lcd.setCursor(0, 0); lcd.print("  RegiBasculas  ");
     lcd.setCursor(0, 1); lcd.print("   del Tolima   ");
-    delay (1000);  lcd.clear();
+    delay (500);  lcd.clear();
     
     
     lcd.setCursor(0, 0); lcd.print("  Configurando  ");
@@ -368,7 +368,7 @@ void openMenu() {
       for ( int i = graphMenu, j = 0; i < endFor2 ; i++, j++ )
       {
         lcd.setCursor(1, j);
-        lcd.print( (i < iMENU) ? txMENU[i] : "                    " );
+        lcd.print( (i < iMENU) ? txMENU[i] : "                " );
       }
 
       for ( int i = 0 ; i < rowsLCD ; i++ )
