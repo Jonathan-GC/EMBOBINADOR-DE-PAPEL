@@ -92,11 +92,12 @@ void secuenciaDeCorte(int vueltas){
       lcd.print("Humectar :  <<< ");
 
 
-      btnPressed = readButtons();
+      
+      //btnPressed = readButtons();
   
 
       //si presiona el boton despliega el menu goteo manual
-      if ( btnPressed == Button::Left ){
+      if (! digitalRead(pENCO_DT)){
         delay(100);
         goteoManual();
       }
