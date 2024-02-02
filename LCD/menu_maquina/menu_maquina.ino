@@ -2,7 +2,7 @@
     LIBRERIAS NECESARIAS PARA EL FUNCIONAMIENTO DEL CODIGO
 */
 #include <Wire.h>
-#include <LCD.h>
+//#include <LCD.h>
 #include <LiquidCrystal_I2C.h>
 #include <EEPROM.h>
 
@@ -75,7 +75,8 @@ Servo Gripper;
 /**
     OBJETOS DE LAS LIBRERIAS
 */
-LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); //Configuracion del LCD I2C (puede ser necesario cambiar el primer valor con la direccion del LCD)
+//LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); //Configuracion del LCD I2C (puede ser necesario cambiar el primer valor con la direccion del LCD)
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 //****************************************
 //definiciones de Funcionamiento
