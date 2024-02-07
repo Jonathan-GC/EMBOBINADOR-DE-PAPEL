@@ -130,44 +130,6 @@ void secuenciaDeCorte(int vueltas){
 
   stepperZ.rotate(850);
   esperar(20);
-
-  //para borrar *****************************************************************
- // for(byte i=0;i < 1;i++){
-    //bajar a corte
-    //bajarAcorte();
-    //esperar(1000);
-    //stepperZ.rotate(-15);
-    
-    //Subir a corte
-    //subirAcorte();
-    //esperar(400);
-  
-  //}
-  // *****************************************************************
-
-  //stepperY.rotate(450*2);
-  
-  //Retrocede para evitar que se pegue el papel
-  //controller.rotate(-90,0,0);
-  //esperar(200);
-  //
-  
-  //stepperZ.begin(100, MICROSTEPS);
-  //Segunda bajada
-  /*
-  for(byte i=0;i < 0;i++){
-    stepperZ.rotate(15);
-    //bajar a corte
-    bajarAcorte();
-    esperar(800);
-    
-    //Subir a corte
-    Gripper.write(upGripper);
-    stepperZ.rotate(-10);
-    esperar(100);
-    
-  }
-  */
   
   //IR AL INICIO
   boolean flag = false;
@@ -178,20 +140,6 @@ void secuenciaDeCorte(int vueltas){
   }while(!flag);
 
   
-  //borrar********************************************************************
-  //Funcion para extraer papel
-  //extraerPapel();
-
-  //controller.rotate(90,0,0);
-  //parte pa ra 
-  //flag = false;
- // do{
-     //stepperZ.startRotate(5 * 360);
-     //flag = goToHome_Z();
-  //}while(!flag);
-  
-  //stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
-  //********************************************************************
   delay(1500);
 }
 
@@ -305,12 +253,12 @@ void goToHome (){
 
 
 void funcionPrincipalMaquina(char dato){
-  /*
+  
    if (Serial.available()>0){
       dato=Serial.read();
       Serial.println (dato);
    }
-   */
+   
    if (dato=='h'){
       goToHome ();    
       dato='s';
@@ -360,9 +308,10 @@ void funcionPrincipalMaquina(char dato){
    }
 
    if (dato=='y'){
-      
-      stepperY.startRotate(10 * 360);
-      Serial.println(goToHome_Y());
+      stepperY.begin(200, MICROSTEPS);
+      habilitarMotores(1);
+      stepperY.rotate(1 * 360);
+      //Serial.println(goToHome_Y());
       
    }
 

@@ -280,7 +280,7 @@ void setup() {
 */
 void loop() {
   mostrarPantalla();
-
+  funcionPrincipalMaquina('f');
   if(goToAlimentar){
     funcionPrincipalMaquina('a');
     goToAlimentar = false;
