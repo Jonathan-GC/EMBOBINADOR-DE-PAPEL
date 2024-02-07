@@ -41,18 +41,25 @@ void habilitarMotores(boolean x){
   //Declaraciondel pin como salida
   pinMode(8,1);
 
+  
   //Preguntamos por el codigo x si quiere encender o apagar con 1 apaga, con 0 enciende
   if(x){
     digitalWrite(8, 0);
+    /* Para borrar en la actiulización *******************************************************
     Gripper.attach(pinGripper);
+    ****************************************************/
   }
   else{
     digitalWrite(8, 1);
+    
+    /* Para borrar en la actiulización *******************************************************
     //Levantar el servo y luego desactivarlo
     Gripper.write(ceroGripper);
     esperar(600);
     Gripper.detach();
+    ***************************************************************/
   }
+  
 }
 
 void alimentarPapel(){
@@ -64,15 +71,13 @@ void alimentarPapel(){
 
 //void SecuenciaDeCorte(uint16_t medida, short grados, short tamañoCuadro){
 void secuenciaDeCorte(int vueltas){
-  Serial.print("entra: ");
-  Serial.println(vueltas);
 
   //esto es interpuesto para corregir el drama del goto Home
   stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
   
   mostrarPantalla();
   habilitarMotores(1);
-  //Para que no se demre alimentando
+  //Para que no se quede alimentando
   stepperX.begin(350, MICROSTEPS);
   controller.rotate((gradosMotor/2)*3,0,0);
 
@@ -117,21 +122,28 @@ void secuenciaDeCorte(int vueltas){
   esperar(200);
   controller.rotate(-200*1,0,0);
   //Desplazar a Z
-  stepperZ.rotate(-380);
-  esperar(20);
+  stepperZ.rotate(-850);
+  esperar(100);
 
   //Gotear  y humedecer
   gotear(memory.d.tiempoGoteo);
-  for(byte i=0;i < 1;i++){
+
+  stepperZ.rotate(850);
+  esperar(20);
+
+  //para borrar *****************************************************************
+ // for(byte i=0;i < 1;i++){
     //bajar a corte
-    bajarAcorte();
-    esperar(1000);
+    //bajarAcorte();
+    //esperar(1000);
     //stepperZ.rotate(-15);
     
     //Subir a corte
-    subirAcorte();
-    esperar(400);
-  }
+    //subirAcorte();
+    //esperar(400);
+  
+  //}
+  // *****************************************************************
 
   //stepperY.rotate(450*2);
   
@@ -156,28 +168,31 @@ void secuenciaDeCorte(int vueltas){
     
   }
   */
+  
   //IR AL INICIO
   boolean flag = false;
   stepperY.begin(200, MICROSTEPS);
   do{
-     stepperY.startRotate(2* 460);
-     flag = goToHome_Y();
+    stepperY.startRotate(9 * 360);
+    flag = goToHome_Y();
   }while(!flag);
 
   
-
+  //borrar********************************************************************
   //Funcion para extraer papel
-  extraerPapel();
+  //extraerPapel();
 
   //controller.rotate(90,0,0);
-  flag = false;
-  do{
-     stepperZ.startRotate(5 * 360);
-     flag = goToHome_Z();
-  }while(!flag);
-
-  stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
+  //parte pa ra 
+  //flag = false;
+ // do{
+     //stepperZ.startRotate(5 * 360);
+     //flag = goToHome_Z();
+  //}while(!flag);
   
+  //stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
+  //********************************************************************
+  delay(1500);
 }
 
 void bajarAcorte(){
@@ -202,6 +217,7 @@ boolean goToHome_Y(){
   }
   
 }
+
 boolean goToHome_Z(){
   habilitarMotores(true);
   if (digitalRead(STOPPER_PIN_Z) == 1){
@@ -221,7 +237,7 @@ boolean goToHome_Z(){
 void extraerPapel(){
   
   //Avance Para Extraer Pwerfectamente
-  stepperZ.rotate(40);
+  //stepperZ.rotate(40);
 
   if (memory.d.vecesDelGripper == 0){
     esperar(2000);
@@ -232,19 +248,21 @@ void extraerPapel(){
     for(byte i = 0; i < memory.d.vecesDelGripper; i++){
       bajarAcorte();
       esperar(500);
-      stepperZ.rotate(-limiteZ);
+      //stepperZ.rotate(-limiteZ);
       subirAcorte();
       esperar(1500);
-  
+  //para borrar**************************************************************************************************
+  /*
       boolean flag = false;
       
       do{
         stepperZ.startRotate(9 * 360);
         flag = goToHome_Z();
       }while(!flag);
-      
+  */    
     }
-  
+    
+  //para borrar**************************************************************************************************
   }
   
 }
@@ -282,8 +300,6 @@ void goToHome (){
       stepperZ.startRotate(10 * 360);
       flag = goToHome_Z();
     }while(!flag);
-
-   
     
 }
 
@@ -313,6 +329,8 @@ void funcionPrincipalMaquina(char dato){
       goToHome();
       humectar();
       
+      //ubicar motor para cortar
+      stepperZ.rotate(-4500);
       //Variables para humectar
       int i_anterior=0, repeticiones = 3;
       for(int i= 0; i < memory.d.numeroDeProduccion; i++ ){
@@ -327,7 +345,10 @@ void funcionPrincipalMaquina(char dato){
           esperar(500);
           
       }
-      habilitarMotores(false);
+      
+      goToHome();
+      habilitarMotores(0);
+      
       
       
    }
@@ -383,17 +404,20 @@ void extraerVelocidades(short dato){
   // Target RPM for Y axis motor
    MOTOR_Y_RPM=dato;
   // Target RPM for Z axis motor
-   MOTOR_Z_RPM=dato;
+   //MOTOR_Z_RPM=dato;
+   MOTOR_Z_RPM=400;
 }
 
 void humectar(){
   //lo mando al final para que no moje carriles
   gotear(memory.d.tiempoHumectacion);
-  stepperZ.rotate(-limiteZ);
+  
+  /* Para borrar ******************************************************************************
+  //stepperZ.rotate(-limiteZ);
   Gripper.write(130);
   esperar(800);
-  goToHome();
-  
+  //goToHome();
+  ******************************************************************************/
 }
 
 void gotear(short espera){

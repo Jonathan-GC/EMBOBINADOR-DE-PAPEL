@@ -219,6 +219,8 @@ void setup() {
 
   Serial.begin(115200);
   
+  lcd.init(); // initialize the lcd
+  lcd.backlight();
   
   pinMode(pENCO_SW,  INPUT_PULLUP);
   pinMode(pENCO_DT,  INPUT_PULLUP);
@@ -228,7 +230,7 @@ void setup() {
   readConfiguration();
 
   // Inicia el LCD:
-  lcd.begin(columnsLCD, rowsLCD);
+  //lcd.begin(columnsLCD, rowsLCD);
   lcd.createChar(iARROW, bARROW);
 
   #if !DEBUG
