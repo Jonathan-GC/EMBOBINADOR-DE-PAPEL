@@ -78,7 +78,7 @@ void secuenciaDeCorte(int vueltas){
   mostrarPantalla();
   habilitarMotores(1);
   //Para que no se quede alimentando
-  stepperX.begin(350, MICROSTEPS);
+  stepperX.begin(200, MICROSTEPS);
   controller.rotate((gradosMotor/2)*3,0,0);
 
   //para calibrar los motores nuevamente
@@ -89,7 +89,9 @@ void secuenciaDeCorte(int vueltas){
 
     //Esperar a que presione enter
     lcd.clear();
+    
     habilitarMotores(false);
+
     while(digitalRead(RUN_PIN)){
       lcd.setCursor(0,0);
       lcd.print("Continuar:  RUN");
@@ -116,19 +118,22 @@ void secuenciaDeCorte(int vueltas){
   
   //controller.rotate(gradosMotor*(vueltas-1),int(360*((vueltas-1)*1)),0);
   //controller.rotate(gradosMotor*(vueltas-1),int(360*vueltas*1.1),0);
-  controller.rotate(gradosMotor*(3), 450*3,0);
-  controller.rotate(gradosMotor*(5), 375*5,0);
+  //controller.rotate(gradosMotor*(3), 455*3,0);
+  controller.rotate(gradosMotor*(3), 405*3,0);
+  //controller.rotate(gradosMotor*(5), 375*5,0);
+  controller.rotate(gradosMotor*(5), 330*5,0);
+  //controller.rotate((gradosMotor/2)*1,150*1,0);
   controller.rotate((gradosMotor/2)*1,150*1,0);
   esperar(200);
   controller.rotate(-200*1,0,0);
   //Desplazar a Z
-  stepperZ.rotate(-850);
-  esperar(100);
+  stepperZ.rotate(-860);
+  esperar(300);
 
   //Gotear  y humedecer
   gotear(memory.d.tiempoGoteo);
 
-  stepperZ.rotate(850);
+  stepperZ.rotate(860);
   esperar(20);
   
   //IR AL INICIO
@@ -254,10 +259,10 @@ void goToHome (){
 
 void funcionPrincipalMaquina(char dato){
   
-   if (Serial.available()>0){
+   /*if (Serial.available()>0){
       dato=Serial.read();
       Serial.println (dato);
-   }
+   }*/
    
    if (dato=='h'){
       goToHome ();    
