@@ -1,397 +1,65 @@
-float sacarGrados(){
-  //return (memory.d.tamanioCuadro*360)/(diametroTambor * pi);
-  unsigned int flag = memory.d.tamanioCuadro*360;
-  unsigned int flag2 = (diametroTambor * pi);
-  return (flag)/flag2;
-}
+Sketch uses 17588 bytes (57%) of program storage space. Maximum is 30720 bytes.
+Global variables use 1555 bytes (75%) of dynamic memory, leaving 493 bytes for local variables. Maximum is 2048 bytes.
+"C:\Users\Usuario\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17/bin/avrdude" "-CC:\Users\Usuario\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17/etc/avrdude.conf" -v -V -patmega328p -carduino "-PCOM3" -b57600 -D "-Uflash:w:C:\Users\Usuario\AppData\Local\Temp\arduino\sketches\86D1B4E1AB0CDC17BA15FE3A6BB4A634/menu_maquina.ino.hex:i"
 
-void configurar_maquina(){
-      //Configuracion del Servo
-    Gripper.attach(pinGripper);
+avrdude: Version 6.3-20190619
+         Copyright (c) 2000-2005 Brian Dean, http://www.bdmicro.com/
+         Copyright (c) 2007-2014 Joerg Wunsch
 
-    //Configuracion del Bomba
-    pinMode(pinHumectador, OUTPUT);
+         System wide configuration file is "C:\Users\Usuario\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17/etc/avrdude.conf"
 
-    
-    //Estraer las velocidades de la EEProm
-    extraerVelocidades(memory.d.velocidad);
-    //Configuracion del motores
-    //A raiz de que descubrí que con 40 puntos abajo de la referencia el motorX mueve bien
-    //Se le quitan 40 puntos
-    stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
-    stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
-    stepperZ.begin(MOTOR_Z_RPM-200, MICROSTEPS);
-    
-    
-    //Configuracion de pines finales de carrera
-    pinMode(STOPPER_PIN_Y, INPUT_PULLUP);
-    pinMode(STOPPER_PIN_Z, INPUT_PULLUP);
-    pinMode(RUN_PIN, INPUT_PULLUP);
-    
-    
-    Gripper.write(ceroGripper);
-    gotear(20);
-    habilitarMotores(false);
-  
-}
+         Using Port                    : COM3
+         Using Programmer              : arduino
+         Overriding Baud Rate          : 57600
+         AVR Part                      : ATmega328P
+         Chip Erase delay              : 9000 us
+         PAGEL                         : PD7
+         BS2                           : PC2
+         RESET disposition             : dedicated
+         RETRY pulse                   : SCK
+         serial program mode           : yes
+         parallel program mode         : yes
+         Timeout                       : 200
+         StabDelay                     : 100
+         CmdexeDelay                   : 25
+         SyncLoops                     : 32
+         ByteDelay                     : 0
+         PollIndex                     : 3
+         PollValue                     : 0x53
+         Memory Detail                 :
 
-//Funcion para hablitar y desabilitar motores de una manera entendible
-void habilitarMotores(boolean x){
-  
-  //Declaraciondel pin como salida
-  pinMode(8,1);
+                                  Block Poll               Page                       Polled
+           Memory Type Mode Delay Size  Indx Paged  Size   Size #Pages MinW  MaxW   ReadBack
+           ----------- ---- ----- ----- ---- ------ ------ ---- ------ ----- ----- ---------
+           eeprom        65    20     4    0 no       1024    4      0  3600  3600 0xff 0xff
+           flash         65     6   128    0 yes     32768  128    256  4500  4500 0xff 0xff
+           lfuse          0     0     0    0 no          1    0      0  4500  4500 0x00 0x00
+           hfuse          0     0     0    0 no          1    0      0  4500  4500 0x00 0x00
+           efuse          0     0     0    0 no          1    0      0  4500  4500 0x00 0x00
+           lock           0     0     0    0 no          1    0      0  4500  4500 0x00 0x00
+           calibration    0     0     0    0 no          1    0      0     0     0 0x00 0x00
+           signature      0     0     0    0 no          3    0      0     0     0 0x00 0x00
 
-  
-  //Preguntamos por el codigo x si quiere encender o apagar con 1 apaga, con 0 enciende
-  if(x){
-    digitalWrite(8, 0);
-    /* Para borrar en la actiulización *******************************************************
-    Gripper.attach(pinGripper);
-    ****************************************************/
-  }
-  else{
-    digitalWrite(8, 1);
-    
-    /* Para borrar en la actiulización *******************************************************
-    //Levantar el servo y luego desactivarlo
-    Gripper.write(ceroGripper);
-    esperar(600);
-    Gripper.detach();
-    ***************************************************************/
-  }
-  
-}
+         Programmer Type : Arduino
+         Description     : Arduino
+         Hardware Version: 2
+         Firmware Version: 1.16
+         Vtarget         : 0.0 V
+         Varef           : 0.0 V
+         Oscillator      : Off
+         SCK period      : 0.1 us
 
-void alimentarPapel(){
-  habilitarMotores(1);
-  controller.rotate(gradosMotor*1, 0, 0);
-  habilitarMotores(0);
-  
-}
+avrdude: AVR device initialized and ready to accept instructions
 
-//void SecuenciaDeCorte(uint16_t medida, short grados, short tamañoCuadro){
-void secuenciaDeCorte(int vueltas){
+Reading | ################################################## | 100% 0.00s
 
-  //esto es interpuesto para corregir el drama del goto Home
-  stepperY.begin(MOTOR_Y_RPM, MICROSTEPS);
-  
-  mostrarPantalla();
-  habilitarMotores(1);
-  //Para que no se quede alimentando
-  stepperX.begin(200, MICROSTEPS);
-  controller.rotate((gradosMotor/2)*3,0,0);
+avrdude: Device signature = 0x1e950f (probably m328p)
+avrdude: reading input file "C:\Users\Usuario\AppData\Local\Temp\arduino\sketches\86D1B4E1AB0CDC17BA15FE3A6BB4A634/menu_maquina.ino.hex"
+avrdude: writing flash (17588 bytes):
 
-  //para calibrar los motores nuevamente
-  stepperX.begin(MOTOR_X_RPM, MICROSTEPS);
+Writing | ################################################## | 100% 4.88s
 
-  //Modo automatico
-  if(memory.d.modoAutomatico){
+avrdude: 17588 bytes of flash written
 
-    //Esperar a que presione enter
-    lcd.clear();
-    
-    habilitarMotores(false);
+avrdude done.  .
 
-    while(digitalRead(RUN_PIN)){
-      lcd.setCursor(0,0);
-      lcd.print("Continuar:  RUN");
-      lcd.setCursor(0,1);
-      lcd.print("Humectar :  <<< ");
-
-
-      
-      //btnPressed = readButtons();
-  
-
-      //si presiona el boton despliega el menu goteo manual
-      if (! digitalRead(pENCO_DT)){
-        delay(100);
-        goteoManual();
-      }
-      
-    }
-    delay(200);
-    mostrarPantalla();
-    habilitarMotores(true);
-  }
-  
-  
-  //controller.rotate(gradosMotor*(vueltas-1),int(360*((vueltas-1)*1)),0);
-  //controller.rotate(gradosMotor*(vueltas-1),int(360*vueltas*1.1),0);
-  //controller.rotate(gradosMotor*(3), 455*3,0);
-  controller.rotate(gradosMotor*(3), 405*3,0);
-  //controller.rotate(gradosMotor*(5), 375*5,0);
-  controller.rotate(gradosMotor*(5), 330*5,0);
-  //controller.rotate((gradosMotor/2)*1,150*1,0);
-  controller.rotate((gradosMotor/2)*1,150*1,0);
-  esperar(200);
-  controller.rotate(-200*1,0,0);
-  //Desplazar a Z
-  stepperZ.rotate(-860);
-  esperar(300);
-
-  //Gotear  y humedecer
-  gotear(memory.d.tiempoGoteo);
-
-  stepperZ.rotate(860);
-  esperar(20);
-  
-  //IR AL INICIO
-  boolean flag = false;
-  stepperY.begin(200, MICROSTEPS);
-  do{
-    stepperY.startRotate(9 * 360);
-    flag = goToHome_Y();
-  }while(!flag);
-
-  
-  delay(1500);
-}
-
-void bajarAcorte(){
-  Gripper.write(downGripper);
-}
-
-void subirAcorte(){    
-  Gripper.write(upGripper);
-}
-
-boolean goToHome_Y(){
-  habilitarMotores(true);
-  if (digitalRead(STOPPER_PIN_Y) == 1){
-        //Serial.println("STOPPER REACHED");
-        //stepperY.startBrake();
-        stepperY.stop();
-        return true;
-  }else{
-
-    unsigned wait_time_micros = stepperY.nextAction();
-    return false;
-  }
-  
-}
-
-boolean goToHome_Z(){
-  habilitarMotores(true);
-  if (digitalRead(STOPPER_PIN_Z) == 1){
-        //Serial.println("STOPPER REACHED");
-        //stepperY.startBrake();
-        stepperZ.stop();
-        return true;
-  }else{
-
-    unsigned wait_time_micros = stepperZ.nextAction();
-    return false;
-  }
-
-}
-
-
-void extraerPapel(){
-  
-  //Avance Para Extraer Pwerfectamente
-  //stepperZ.rotate(40);
-
-  if (memory.d.vecesDelGripper == 0){
-    esperar(2000);
-  }
-  else{
-    
-  
-    for(byte i = 0; i < memory.d.vecesDelGripper; i++){
-      bajarAcorte();
-      esperar(500);
-      //stepperZ.rotate(-limiteZ);
-      subirAcorte();
-      esperar(1500);
-  //para borrar**************************************************************************************************
-  /*
-      boolean flag = false;
-      
-      do{
-        stepperZ.startRotate(9 * 360);
-        flag = goToHome_Z();
-      }while(!flag);
-  */    
-    }
-    
-  //para borrar**************************************************************************************************
-  }
-  
-}
-
-void esperar(int periodo){
-  TiempoAhora = millis();
-  while(millis() < TiempoAhora+periodo){
-    
-  }   
-}
-
-void moverEjeX(){
-  //stepperX.rotate(360);\\
-  habilitarMotores(1);
-  controller.rotate(360*50,0,0);
-  habilitarMotores(0);
-}
-
-void goToHome (){
-
-
-  //Levantamos el Griper para evitar que se estrelle
-    Gripper.write(upGripper);
-
-    boolean flag = false;
-    stepperY.begin(200, MICROSTEPS);
-    do{
-      stepperY.startRotate(9 * 360);
-      flag = goToHome_Y();
-    }while(!flag);
-
-    flag = false;
-    
-    do{
-      stepperZ.startRotate(10 * 360);
-      flag = goToHome_Z();
-    }while(!flag);
-    
-}
-
-
-void funcionPrincipalMaquina(char dato){
-  
-   /*if (Serial.available()>0){
-      dato=Serial.read();
-      Serial.println (dato);
-   }*/
-   
-   if (dato=='h'){
-      goToHome ();    
-      dato='s';
-   }
-   if (dato=='s'){
-      habilitarMotores(0);
-   }
-
-   if (dato=='a'){
-      alimentarPapel();
-   }
-
-   if (dato=='t'){
-
-      //Ir a inicio
-      goToHome();
-      humectar();
-      
-      //ubicar motor para cortar
-      stepperZ.rotate(-4500);
-      //Variables para humectar
-      int i_anterior=0, repeticiones = 3;
-      for(int i= 0; i < memory.d.numeroDeProduccion; i++ ){
-          secuenciaDeCorte(memory.d.NroCuadros);
-          //Muestra la cantidad dispensada, + 1 para que no de cero de inicio
-          cantidadDispensada(i+1);
-          
-          if((i-i_anterior) >= repeticiones){
-            humectar();
-            i_anterior = i;
-          }
-          esperar(500);
-          
-      }
-      
-      goToHome();
-      habilitarMotores(0);
-      
-      
-      
-   }
-
-   if (dato=='p'){
-      habilitarMotores(1);
-      
-      dato=0;
-   }
-
-   if (dato=='y'){
-      stepperY.begin(200, MICROSTEPS);
-      habilitarMotores(1);
-      stepperY.rotate(1 * 360);
-      //Serial.println(goToHome_Y());
-      
-   }
-
-   if (dato=='z'){
-      stepperZ.startRotate(10 * 360);
-      Serial.println(goToHome_Z());
-      
-   }
-
-   if (dato=='u'){
-      subirAcorte();
-      
-      
-   }
-
-   if (dato=='d'){
-      bajarAcorte();
-      
-   }
-   if (dato=='m'){
-    habilitarMotores(1);
-    moverEjeX();
-   }
-   
-   
-}
-
-void cantidadDispensada(int factor){
-  //memory.d.metrosEnrrollados = memory.d.numeroDeCuadros*memory.d.tamanioCuadro*memory.d.lineasCargadas*factor;
-  unsigned long flag;
-  flag = memory.d.lineasCargadas * factor;
-  memory.d.metrosEnrrollados = flag;
-  writeConfiguration();
-}
-
-void extraerVelocidades(short dato){
-    // Target RPM for X axis motor
-   MOTOR_X_RPM=dato;
-  // Target RPM for Y axis motor
-   MOTOR_Y_RPM=dato;
-  // Target RPM for Z axis motor
-   //MOTOR_Z_RPM=dato;
-   MOTOR_Z_RPM=400;
-}
-
-void humectar(){
-  //lo mando al final para que no moje carriles
-  gotear(memory.d.tiempoHumectacion);
-  
-  /* Para borrar ******************************************************************************
-  //stepperZ.rotate(-limiteZ);
-  Gripper.write(130);
-  esperar(800);
-  //goToHome();
-  ******************************************************************************/
-}
-
-void gotear(short espera){
-  digitalWrite(pinHumectador,1);
-  esperar(espera);
-  digitalWrite(pinHumectador,0);
-}
-
-void goteoManual(){
-  lcd.clear();
-  lcd.print("Enter para Salir");
-  lcd.setCursor(0,1);
-  lcd.print("RUN para Gotear");
-  
-  do{
-    if(!digitalRead(RUN_PIN))
-      digitalWrite(pinHumectador,1);
-    else
-      digitalWrite(pinHumectador,0);
-  }while(digitalRead(pENCO_SW));
-
-  delay(300);
-}
